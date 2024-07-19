@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:laya/constants.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
@@ -20,7 +21,7 @@ class Home extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Supabase.instance.client.auth.signOut();
-                Navigator.of(context).pushReplacementNamed('/');
+                context.go('/');
               },
               child: const Text(
                 'Log Out',

@@ -1,39 +1,38 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:laya/constants.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
-class SignUp extends StatelessWidget {
+class SignUp extends StatefulWidget {
   const SignUp({super.key});
+
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
+  // Get screen width of viewport.
+  double get screenWidth => MediaQuery.of(context).size.width;
+  double get screenHeight => MediaQuery.of(context).size.height;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar('Sign In'),
+      appBar: appBar('SIGN IN', automaticallyImplyLeading: true),
       body: ListView(
         padding: const EdgeInsets.all(24.0),
         children: [
           SupaEmailAuth(
-            redirectTo: kIsWeb ? null : 'io.supabase.webtoons://',
+            redirectTo: kIsWeb ? null : 'com.example.laya://login-callback/',
+            resetPasswordRedirectTo:
+                kIsWeb ? null : 'com.example.laya://login-callback/',
             onSignInComplete: (response) {
-              Navigator.of(context).pushReplacementNamed('/home');
+              context.go('/home');
             },
             onSignUpComplete: (response) {
-              Navigator.of(context).pushReplacementNamed('/home');
+              context.go('/home');
             },
-            metadataFields: [
-              MetaDataField(
-                prefixIcon: const Icon(Icons.person),
-                label: 'Username',
-                key: 'username',
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Please enter something';
-                  }
-                  return null;
-                },
-              ),
-            ],
           ),
           const Divider(),
           optionText,
@@ -41,7 +40,7 @@ class SignUp extends StatelessWidget {
           ElevatedButton.icon(
             icon: const Icon(Icons.email),
             onPressed: () {
-              Navigator.popAndPushNamed(context, '/magic_link');
+              context.go('/magic_link');
             },
             label: const Text('Sign in with Magic Link'),
           ),
@@ -57,13 +56,15 @@ class SignUp extends StatelessWidget {
           SupaSocialsAuth(
             colored: true,
             nativeGoogleAuthConfig: const NativeGoogleAuthConfig(
-              webClientId: 'YOUR_WEB_CLIENT_ID',
-              iosClientId: 'YOUR_IOS_CLIENT_ID',
+              webClientId:
+                  '1041085987882-tf1dca8vbnv5ect9gqljupdpgr5iaqbp.apps.googleusercontent.com',
+              iosClientId:
+                  '1041085987882-jt7g00fbtaq13uckto4ti6nrvrunks9o.apps.googleusercontent.com',
             ),
             enableNativeAppleAuth: false,
-            socialProviders: OAuthProvider.values,
+            socialProviders: socialProviders,
             onSuccess: (session) {
-              Navigator.of(context).pushReplacementNamed('/home');
+              context.go('/home');
             },
           ),
         ],
