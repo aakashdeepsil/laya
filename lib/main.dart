@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/landing.dart';
 import 'package:laya/routes/routes.dart';
+import 'package:laya/splash.dart';
 import 'package:laya/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -28,7 +28,8 @@ final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/',
-      builder: (BuildContext context, GoRouterState state) => const Landing(),
+      builder: (BuildContext context, GoRouterState state) =>
+          const SplashPage(),
       routes: routes,
     ),
   ],

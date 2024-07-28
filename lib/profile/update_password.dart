@@ -21,15 +21,6 @@ class UpdatePassword extends StatelessWidget {
                 context.go('/home');
               },
             ),
-            TextButton(
-              child: const Text(
-                'Take me back to Sign Up',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              onPressed: () {
-                context.go('/');
-              },
-            ),
           ],
         ),
       ),

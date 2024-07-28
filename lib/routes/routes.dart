@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/home.dart';
 import 'package:laya/magic_link.dart';
+import 'package:laya/profile/edit_profile.dart';
+import 'package:laya/profile/profile.dart';
+import 'package:laya/profile/profile_settings.dart';
 import 'package:laya/sign_in.dart';
-import 'package:laya/update_password.dart';
+import 'package:laya/profile/update_password.dart';
 
 List<RouteBase> routes = [
   GoRoute(
@@ -60,30 +63,28 @@ List<RouteBase> routes = [
   //     ),
   //   ],
   // ),
-  // GoRoute(
-  //   path: 'profile',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const ProfilePage();
-  //   },
-  //   routes: <RouteBase>[
-  //     GoRoute(
-  //       path: 'edit_profile',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         return const EditProfilePage();
-  //       },
-  //     ),
-  //     GoRoute(
-  //       path: 'settings',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         return const ProfileSettingsPage();
-  //       },
-  //     ),
-  //     GoRoute(
-  //       path: 'update_password',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         return const UpdatePassword();
-  //       },
-  //     ),
-  //   ],
-  // ),
+  GoRoute(
+    path: 'profile',
+    builder: (BuildContext context, GoRouterState state) {
+      return const ProfilePage();
+    },
+  ),
+  GoRoute(
+    path: 'edit_profile',
+    builder: (BuildContext context, GoRouterState state) {
+      return const EditProfilePage();
+    },
+  ),
+  GoRoute(
+    path: 'profile_settings',
+    builder: (BuildContext context, GoRouterState state) {
+      return const ProfileSettings();
+    },
+  ),
+  GoRoute(
+    path: 'update_password',
+    builder: (BuildContext context, GoRouterState state) {
+      return const UpdatePassword();
+    },
+  ),
 ];
