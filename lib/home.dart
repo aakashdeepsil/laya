@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:laya/components/bottom_navigation_bar.dart';
 import 'package:laya/components/content_carousel.dart';
 import 'package:laya/components/homepage_carousel.dart';
 import 'package:laya/constants.dart';
-import 'package:laya/theme/theme_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -79,32 +75,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               const ContentCarousel(),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Supabase.instance.client.auth.signOut();
-                  context.go('/');
-                },
-                child: const Text(
-                  'Log Out',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Provider.of<ThemeProvider>(context, listen: false)
-                      .toggleTheme();
-                },
-                child: const Text(
-                  'Toggle Theme',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              SizedBox(height: screenHeight * 0.025),
             ],
           ),
         ),

@@ -40,7 +40,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .single();
 
       _avatarUrl = (data['avatar_url'] ?? '') as String;
-      print(_avatarUrl);
       _bio.text = (data['bio'] ?? '') as String;
       _firstNameController.text = (data['first_name'] ?? '') as String;
       _lastNameController.text = (data['last_name'] ?? '') as String;
