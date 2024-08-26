@@ -187,7 +187,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
+        preferredSize: Size.fromHeight(screenHeight * 0.05),
         child: Container(
           decoration: BoxDecoration(
             border: Border(
@@ -198,11 +198,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
           child: AppBar(
             automaticallyImplyLeading: true,
-            backgroundColor: Colors.white,
-            title: const Text(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, size: screenHeight * 0.03),
+              onPressed: () => context.go('/profile'),
+            ),
+            title: Text(
               "Edit Profile",
               style: TextStyle(
-                color: Colors.black,
+                fontSize: screenHeight * 0.025,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -210,10 +213,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             elevation: 0,
             actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.check,
-                  color: Colors.black,
-                ),
+                icon: Icon(Icons.check, size: screenHeight * 0.03),
                 onPressed: _loading ? null : _updateProfile,
               ),
             ],

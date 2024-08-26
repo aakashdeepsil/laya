@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/components/bottom_navigation_bar.dart';
-import 'package:laya/post.dart';
+import 'package:laya/components/post.dart';
 import 'package:laya/profile/profile_header.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -90,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
           .eq('email', userEmail);
 
       setState(() {
-        posts = data;
+        posts = data.reversed.toList();
       });
     } on PostgrestException catch (error) {
       if (mounted) {
@@ -246,7 +246,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 : ListView.builder(
                                     itemCount: posts.length,
                                     itemBuilder: (context, index) {
-                                      return Post(postItem: posts[index]);
+                                      return Post(
+                                        avatarUrl: avatarUrl,
+                                        postItem: posts[index],
+                                        username: username,
+                                      );
                                     },
                                   ),
                             GridView.builder(

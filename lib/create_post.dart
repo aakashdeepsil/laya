@@ -64,8 +64,10 @@ class _CreatePostState extends State<CreatePost> {
           .from('posts')
           .insert(
             {
+              'comments': {},
               'description': description,
               'email': Supabase.instance.client.auth.currentUser?.email,
+              'likes': {},
               'media': imageUrlList,
             },
           )
