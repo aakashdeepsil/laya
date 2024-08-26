@@ -38,9 +38,9 @@ class _LandingState extends State<Landing> {
                     child: Text(
                       "INDIA'S BIGGEST WEBTOONS PLATFORM",
                       style: TextStyle(
+                        color: Colors.white,
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -52,8 +52,13 @@ class _LandingState extends State<Landing> {
                           vertical: screenHeight * 0.02,
                         ),
                         child: ElevatedButton(
-                          onPressed: () => context.go('/sign_in'),
-                          child: const Text("GET STARTED"),
+                          onPressed: () => context.push('/sign_in'),
+                          child: Text(
+                            "GET STARTED",
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.017,
+                            ),
+                          ),
                         ),
                       ),
                       Container(
@@ -61,8 +66,13 @@ class _LandingState extends State<Landing> {
                           vertical: screenHeight * 0.02,
                         ),
                         child: ElevatedButton(
-                          onPressed: () => context.go('/about_us'),
-                          child: const Text("ABOUT US"),
+                          onPressed: () => context.push('/about_us'),
+                          child: Text(
+                            "ABOUT US",
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.017,
+                            ),
+                          ),
                         ),
                       ),
                     ],
