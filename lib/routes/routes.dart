@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/create_post.dart';
 import 'package:laya/home.dart';
 import 'package:laya/magic_link.dart';
 import 'package:laya/profile/edit_profile.dart';
@@ -33,36 +34,10 @@ List<RouteBase> routes = [
       return const Home();
     },
   ),
-  // GoRoute(
-  //   path: 'socials',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const SocialsHomepage();
-  //   },
-  //   routes: <RouteBase>[
-  //     GoRoute(
-  //       path: 'post/:postId',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         final String? postId = state.pathParameters['postId'];
-  //         return PostPage(postId: postId);
-  //       },
-  //     ),
-  //     GoRoute(
-  //       path: 'post/:postId/media/:mediaId',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         final String? postId = state.pathParameters['postId'];
-  //         final String? mediaId = state.pathParameters['mediaId'];
-  //         return PostMediaViewPage(postId: postId, mediaId: mediaId);
-  //       },
-  //     ),
-  //     GoRoute(
-  //       path: 'post/:postId/comments/add_comment',
-  //       builder: (BuildContext context, GoRouterState state) {
-  //         final String? postId = state.pathParameters['postId'];
-  //         return AddCommentPage(postId: postId);
-  //       },
-  //     ),
-  //   ],
-  // ),
+  GoRoute(
+    path: 'create_post',
+    builder: (BuildContext context, GoRouterState state) => const CreatePost(),
+  ),
   GoRoute(
     path: 'profile',
     builder: (BuildContext context, GoRouterState state) {

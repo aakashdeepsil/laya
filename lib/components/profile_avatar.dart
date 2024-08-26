@@ -23,34 +23,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.imageUrl == null || widget.imageUrl!.isEmpty)
-          CircleAvatar(
-            radius: screenHeight * 0.05,
-            child: Icon(
-              LucideIcons.user,
-              size: screenHeight * 0.075,
-            ),
-          )
-        else
-          CircleAvatar(
-            radius: screenHeight * 0.05,
-            backgroundImage: NetworkImage(widget.imageUrl!),
-          ),
-        SizedBox(height: screenHeight * 0.01),
-        _isLoading
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                onPressed: _upload,
-                child: const Text('Upload New Profile Photo'),
-              ),
-      ],
-    );
-  }
-
   Future<void> _upload() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -87,5 +59,36 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (widget.imageUrl == null || widget.imageUrl!.isEmpty)
+          CircleAvatar(
+            radius: screenHeight * 0.05,
+            child: Icon(
+              LucideIcons.user,
+              size: screenHeight * 0.075,
+            ),
+          )
+        else
+          CircleAvatar(
+            radius: screenHeight * 0.05,
+            backgroundImage: NetworkImage(widget.imageUrl!),
+          ),
+        SizedBox(height: screenHeight * 0.01),
+        _isLoading
+            ? const CircularProgressIndicator()
+            : ElevatedButton(
+                onPressed: _upload,
+                child: Text(
+                  'Upload New Profile Photo',
+                  style: TextStyle(fontSize: screenHeight * 0.017),
+                ),
+              ),
+      ],
+    );
   }
 }
