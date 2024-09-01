@@ -12,26 +12,43 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  // Get the screen width and height
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
+  // Variable to store the loading state
   bool _loading = true;
-  String? _avatarUrl;
 
-  final _bio = TextEditingController();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _usernameController = TextEditingController();
+  // Variables to store the user's avatar URL
+  String _avatarUrl = '';
 
+  // Variables to store the user's bio, first name, last name, and username
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+
+  // Form key
   final _formKey = GlobalKey<FormState>();
 
-  /// Called once a user id is received within `onAuthenticated()`
-  Future<void> _getProfile() async {
-    setState(() {
-      _loading = true;
-    });
+  // Function to show error snackbar
+  void _showErrorSnackBar(dynamic error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error.toString(),
+          style: TextStyle(fontSize: screenHeight * 0.015),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
 
+  // Function to get the user's profile
+  Future<void> _getProfile() async {
     try {
+      setState(() => _loading = true);
+
       final userId = Supabase.instance.client.auth.currentSession!.user.id;
       final data = await Supabase.instance.client
           .from('profiles')
@@ -39,44 +56,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .eq('id', userId)
           .single();
 
-      _avatarUrl = (data['avatar_url'] ?? '') as String;
-      _bio.text = (data['bio'] ?? '') as String;
-      _firstNameController.text = (data['first_name'] ?? '') as String;
-      _lastNameController.text = (data['last_name'] ?? '') as String;
-      _usernameController.text = (data['username'] ?? '') as String;
+      _avatarUrl = data['avatar_url'];
+      _bioController.text = data['bio'];
+      _firstNameController.text = data['first_name'];
+      _lastNameController.text = data['last_name'];
+      _usernameController.text = data['username'];
     } on PostgrestException catch (error) {
-      if (mounted) {
-        SnackBar(
-          content: Text(error.message),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        );
-      }
+      _showErrorSnackBar(error.message);
     } catch (error) {
-      if (mounted) {
-        SnackBar(
-          content: const Text('Unexpected error occurred. Try again.'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        );
-      }
+      _showErrorSnackBar(error.toString());
     } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
+      setState(() => _loading = false);
     }
   }
 
-  /// Called when user taps `Update` button
+  // Called when user taps `Update` button
   Future<void> _updateProfile() async {
-    setState(() {
-      _loading = true;
-    });
-
     final userName = _usernameController.text.trim();
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
-    final bio = _bio.text.trim();
+    final bio = _bioController.text.trim();
     final userId = Supabase.instance.client.auth.currentUser?.id;
 
     final updates = {
@@ -90,63 +89,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
     };
 
     try {
+      setState(() => _loading = true);
+
       await Supabase.instance.client
           .from('profiles')
           .update(updates)
           .eq('id', userId!);
 
       if (mounted) {
-        const SnackBar(
-          content: Text('Successfully updated profile!'),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Profile updated successfully!',
+              style: TextStyle(fontSize: screenHeight * 0.015),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
         );
-      }
-    } on PostgrestException catch (error) {
-      if (mounted) {
-        SnackBar(
-          content: Text(error.message),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        );
-      }
-    } catch (error) {
-      if (mounted) {
-        SnackBar(
-          content: const Text('Unexpected error occurred'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-        SnackBar(
-          content: const Text('Profile updated successfully!'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        );
-        GoRouter.of(context).go('/profile');
-      }
-    }
-  }
 
-  /// Called when image has been uploaded to Supabase storage from within Avatar widget
-  Future<void> _onUpload(String imageUrl) async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-
-      await Supabase.instance.client
-          .from('profiles')
-          .update({'avatar_url': imageUrl}).eq('id', userId!);
-      if (mounted) {
-        const SnackBar(
-          content: Text('Updated your profile image!'),
-        );
+        context.go('/profile/${Supabase.instance.client.auth.currentUser?.id}');
       }
     } on PostgrestException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error.message),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -155,18 +123,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error.toString()),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
+    } finally {
+      setState(() => _loading = false);
     }
-    if (!mounted) {
-      return;
-    }
+  }
 
-    setState(() {
-      _avatarUrl = imageUrl;
-    });
+  /// Called when image has been uploaded to Supabase storage from within Avatar widget
+  Future<void> _onUpload(String imageUrl) async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser!.id;
+
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'avatar_url': imageUrl}).eq('id', userId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Avatar uploaded successfully!',
+              style: TextStyle(fontSize: screenHeight * 0.015),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+
+      setState(() => _avatarUrl = imageUrl);
+    } on PostgrestException catch (error) {
+      _showErrorSnackBar(error.message);
+    } catch (error) {
+      _showErrorSnackBar(error.toString());
+    }
   }
 
   @override
@@ -191,23 +183,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Container(
           decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(
-                color: Colors.grey[200] ?? Colors.white,
-              ),
+              bottom: BorderSide(color: Colors.grey[200] ?? Colors.white),
             ),
           ),
           child: AppBar(
-            automaticallyImplyLeading: true,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, size: screenHeight * 0.03),
-              onPressed: () => context.go('/profile'),
-            ),
             title: Text(
               "Edit Profile",
-              style: TextStyle(
-                fontSize: screenHeight * 0.025,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: screenHeight * 0.025),
             ),
             centerTitle: false,
             elevation: 0,
@@ -262,7 +244,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                             SizedBox(height: screenHeight * 0.01),
                             TextFormField(
-                              controller: _bio,
+                              controller: _bioController,
                               decoration: const InputDecoration(
                                 labelText: 'Bio',
                                 hintText: 'Tell us about yourself...',

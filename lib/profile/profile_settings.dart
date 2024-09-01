@@ -12,16 +12,17 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
+  // Get the screen width and height
+  double get screenWidth => MediaQuery.of(context).size.width;
+  double get screenHeight => MediaQuery.of(context).size.height;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.go('/profile');
-          },
+        title: Text(
+          'Settings',
+          style: TextStyle(fontSize: screenHeight * 0.025),
         ),
       ),
       body: SafeArea(
@@ -29,27 +30,35 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             child: Column(
           children: <Widget>[
             ListTile(
-              title: const Text('Change Theme'),
+              title: Text(
+                'Change Theme',
+                style: TextStyle(fontSize: screenHeight * 0.02),
+              ),
               onTap: () => Provider.of<ThemeProvider>(context, listen: false)
                   .toggleTheme(),
             ),
             ListTile(
-              title: const Text('Edit Profile Information'),
-              onTap: () {
-                context.go('/edit_profile');
-              },
+              title: Text(
+                'Edit Profile Information',
+                style: TextStyle(fontSize: screenHeight * 0.02),
+              ),
+              onTap: () => context.push('/edit_profile'),
             ),
             ListTile(
-              title: const Text('Update Password'),
-              onTap: () {
-                context.go('/update_password');
-              },
+              title: Text(
+                'Update Password',
+                style: TextStyle(fontSize: screenHeight * 0.02),
+              ),
+              onTap: () => context.push('/update_password'),
             ),
             ListTile(
-              title: const Text('Log Out'),
+              title: Text(
+                'Log Out',
+                style: TextStyle(fontSize: screenHeight * 0.02),
+              ),
               onTap: () {
                 Supabase.instance.client.auth.signOut();
-                context.go('/');
+                context.go('/sign_in');
               },
             ),
           ],
