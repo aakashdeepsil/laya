@@ -28,9 +28,7 @@ class _CreatePostState extends State<CreatePost> {
     try {
       final List<XFile> selectedImages = await imagePicker.pickMultiImage();
       if (selectedImages.isNotEmpty) {
-        setState(() {
-          imageFileList.addAll(selectedImages);
-        });
+        setState(() => imageFileList.addAll(selectedImages));
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,9 +51,7 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Future<void> _createPost() async {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     final description = _descriptionController.text.trim();
 
@@ -64,11 +60,9 @@ class _CreatePostState extends State<CreatePost> {
           .from('posts')
           .insert(
             {
-              'comments': {},
               'description': description,
-              'email': Supabase.instance.client.auth.currentUser?.email,
-              'likes': {},
               'media': imageUrlList,
+              'user_id': Supabase.instance.client.auth.currentUser?.id,
             },
           )
           .select('post_id')
@@ -125,12 +119,10 @@ class _CreatePostState extends State<CreatePost> {
             .from('posts')
             .getPublicUrl(imagePath);
 
-        setState(() {
-          imageUrlList.add(imageUrl);
-        });
+        setState(() => imageUrlList.add(imageUrl));
       }
 
-      if (mounted) {
+      if (mounted && imageUrlList.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Media uploaded successfully.'),
@@ -149,8 +141,6 @@ class _CreatePostState extends State<CreatePost> {
       }
     }
 
-    print(imageUrlList);
-
     final updates = {'media': imageUrlList};
 
     try {
@@ -158,6 +148,10 @@ class _CreatePostState extends State<CreatePost> {
           .from('posts')
           .update(updates)
           .eq('post_id', int.parse(postId));
+
+      if (mounted) {
+        context.push('/profile');
+      }
     } on PostgrestException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,13 +172,7 @@ class _CreatePostState extends State<CreatePost> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post created successfully!')),
-        );
-        GoRouter.of(context).go('/profile');
+        setState(() => _loading = false);
       }
     }
   }

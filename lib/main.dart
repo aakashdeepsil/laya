@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/error.dart';
 import 'package:laya/routes/routes.dart';
 import 'package:laya/splash.dart';
 import 'package:laya/theme/theme_provider.dart';
@@ -24,7 +25,7 @@ Future<void> main() async {
 }
 
 final GoRouter _router = GoRouter(
-  // errorBuilder: (context, state) => ErrorScreen(state.error),
+  errorBuilder: (context, state) => ErrorScreen(error: state.error),
   routes: <RouteBase>[
     GoRoute(
       path: '/',
