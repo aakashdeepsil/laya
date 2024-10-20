@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/constants.dart';
 import 'package:laya/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -19,12 +20,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: TextStyle(fontSize: screenHeight * 0.025),
-        ),
-      ),
+      appBar: customAppBar(screenHeight, 'Settings'),
       body: SafeArea(
         child: SingleChildScrollView(
             child: Column(

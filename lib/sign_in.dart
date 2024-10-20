@@ -17,6 +17,43 @@ class _SignUpState extends State<SignUp> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
+  void handleSignUpComplete(response) async {
+    try {
+      await Supabase.instance.client.from('profiles').insert({
+        'avatar_url': '',
+        'created_at': DateTime.now().toIso8601String(),
+        'email': response.user?.email,
+        'first_name': '',
+        'id': response.user?.id,
+        'last_name': '',
+        'updated_at': DateTime.now().toIso8601String(),
+        'username': '',
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Profile created successfully!',
+              style: TextStyle(fontSize: screenHeight * 0.015),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+        );
+
+        context.go('/complete_profile');
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,8 +74,8 @@ class _SignUpState extends State<SignUp> {
             redirectTo: kIsWeb ? null : 'com.example.laya://login-callback/',
             resetPasswordRedirectTo:
                 kIsWeb ? null : 'com.example.laya://login-callback/',
-            onSignInComplete: (response) => context.go('/home'),
-            onSignUpComplete: (response) => context.go('/home'),
+            onSignInComplete: (response) => context.go('/complete_profile'),
+            onSignUpComplete: (response) => handleSignUpComplete(response),
           ),
           const Divider(),
           Text(

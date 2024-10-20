@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:laya/components/bottom_navigation_bar.dart';
 import 'package:laya/components/content_carousel.dart';
 import 'package:laya/components/homepage_carousel.dart';
 import 'package:laya/constants.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -16,21 +18,48 @@ class _HomeState extends State<Home> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  List<String> kDemoImages = [
-    'https://i.pinimg.com/originals/7f/91/a1/7f91a18bcfbc35570c82063da8575be8.jpg',
-    'https://www.absolutearts.com/portfolio3/a/afifaridasiddique/Still_Life-1545967888l.jpg',
-    'https://cdn11.bigcommerce.com/s-x49po/images/stencil/1280x1280/products/53415/72138/1597120261997_IMG_20200811_095922__49127.1597493165.jpg?c=2',
-    'https://i.pinimg.com/originals/47/7e/15/477e155db1f8f981c4abb6b2f0092836.jpg',
-    'https://images.saatchiart.com/saatchi/770124/art/3760260/2830144-QFPTZRUH-7.jpg',
-    'https://images.unsplash.com/photo-1471943311424-646960669fbc?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MXx8c3RpbGwlMjBsaWZlfGVufDB8fDB8&ixlib=rb-1.2.1&w=1000&q=80',
-    'https://cdn11.bigcommerce.com/s-x49po/images/stencil/1280x1280/products/40895/55777/1526876829723_P211_24X36__2018_Stilllife_15000_20090__91926.1563511650.jpg?c=2',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIUsxpakPiqVF4W_rOlq6eoLYboOFoxw45qw&usqp=CAU',
+  List<String> anime = [
+    'https://qph.cf2.quoracdn.net/main-qimg-5abcf39750a6e0f1074f1249b66d6445',
+    'https://wallpapercave.com/wp/wp10508780.jpg',
+    'https://mlpnk72yciwc.i.optimole.com/cqhiHLc.IIZS~2ef73/w:auto/h:auto/q:75/https://bleedingcool.com/wp-content/uploads/2020/10/ChainsawMan_GN01_C1_Web-copy.jpg',
+    'https://upload.wikimedia.org/wikipedia/en/9/90/One_Piece%2C_Volume_61_Cover_%28Japanese%29.jpg',
   ];
+
+  List<String> titles = [
+    'My Hero Academia',
+    'Jujutsu Kaisen',
+    'Chainsawman',
+    'One Piece',
+  ];
+
+  Future<void> checkProfileCompletion() async {
+    String userId = Supabase.instance.client.auth.currentSession!.user.id;
+
+    var data = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .single();
+
+    if (data['username'].length == 0 &&
+        data['first_name'].length == 0 &&
+        data['last_name'].length == 0) {
+      if (mounted) {
+        context.go('/complete_profile');
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkProfileCompletion();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar('LAYA'),
+      appBar: customAppBar(screenHeight, 'LAYA'),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -41,7 +70,10 @@ class _HomeState extends State<Home> {
               const HomepageCarousel(),
               SizedBox(height: screenHeight * 0.025),
               Padding(
-                padding: EdgeInsets.only(left: screenWidth * 0.025),
+                padding: EdgeInsets.only(
+                  bottom: screenHeight * 0.01,
+                  left: screenWidth * 0.025,
+                ),
                 child: Text(
                   'Top WebToons',
                   style: TextStyle(
@@ -50,10 +82,13 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              const ContentCarousel(),
+              ContentCarousel(content: anime, titles: titles),
               SizedBox(height: screenHeight * 0.025),
               Padding(
-                padding: EdgeInsets.only(left: screenWidth * 0.025),
+                padding: EdgeInsets.only(
+                  bottom: screenHeight * 0.01,
+                  left: screenWidth * 0.025,
+                ),
                 child: Text(
                   'Continue Watching',
                   style: TextStyle(
@@ -62,10 +97,13 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              const ContentCarousel(),
+              ContentCarousel(content: anime, titles: titles),
               SizedBox(height: screenHeight * 0.025),
               Padding(
-                padding: EdgeInsets.only(left: screenWidth * 0.025),
+                padding: EdgeInsets.only(
+                  bottom: screenHeight * 0.01,
+                  left: screenWidth * 0.025,
+                ),
                 child: Text(
                   'Continue Reading',
                   style: TextStyle(
@@ -74,7 +112,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              const ContentCarousel(),
+              ContentCarousel(content: anime, titles: titles),
               SizedBox(height: screenHeight * 0.025),
             ],
           ),

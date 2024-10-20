@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
-  const MyBottomNavigationBar({
-    super.key,
-    required this.index,
-  });
-
   final int index;
+
+  const MyBottomNavigationBar({super.key, required this.index});
 
   @override
   State<MyBottomNavigationBar> createState() => _MyBottomNavigationBarState();
@@ -60,17 +58,21 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
         onTap: (value) {
           switch (value) {
             case 0:
-              context.go('/home');
+              context.push('/home');
               break;
             case 1:
+              context.push('/explore');
               break;
             case 2:
-              context.go('/socials');
+              context.push('/socials');
               break;
             case 3:
+              context.push('/library');
               break;
             case 4:
-              context.go('/profile');
+              context.push(
+                '/profile/${Supabase.instance.client.auth.currentUser?.id}',
+              );
               break;
             default:
               break;

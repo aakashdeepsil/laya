@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/constants.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
@@ -8,6 +9,7 @@ class Post extends StatefulWidget {
   final String avatarUrl;
   final Map<String, dynamic> postItem;
   final String username;
+
   const Post({
     super.key,
     required this.avatarUrl,
@@ -20,17 +22,22 @@ class Post extends StatefulWidget {
 }
 
 class _PostState extends State<Post> {
+  // Get the current screen width and height
   double get screenHeight => MediaQuery.of(context).size.height;
   double get screenWidth => MediaQuery.of(context).size.width;
 
+  // Set the initial bookmark icon to bookmark_border_outlined
   IconData bookmarkIcon = Icons.bookmark_border_outlined;
   IconData likeIcon = Icons.favorite_border_outlined;
 
+  // Initialize an empty list to store images
   List<dynamic> imgList = [];
 
-  int countLikes = 0;
-  int countComments = 0;
+  // Store the number of likes and comments
+  int likesCount = 0;
+  int commentsCount = 0;
 
+  // Get the time difference between the post creation time and now
   String getTimeDifference(String createdAt) {
     DateTime createdAtDate = DateTime.parse(createdAt);
     DateTime now = DateTime.now();
@@ -47,60 +54,113 @@ class _PostState extends State<Post> {
     }
   }
 
+  // Handle the like button click event
   void onClickLikeIcon() async {
-    if (likeIcon == Icons.favorite_outlined) {
-      widget.postItem['likes']
-          .remove(Supabase.instance.client.auth.currentUser!.id);
-    } else {
-      widget.postItem['likes'][Supabase.instance.client.auth.currentUser!.id] =
-          true;
+    try {
+      if (likeIcon == Icons.favorite_border_outlined) {
+        // Add the like to the post
+        await Supabase.instance.client.from('likes').insert({
+          'post_id': widget.postItem['id'],
+          'user_id': Supabase.instance.client.auth.currentUser!.id,
+        });
+
+        setState(() => likesCount++);
+      } else {
+        // Remove the like from the post
+        await Supabase.instance.client
+            .from('likes')
+            .delete()
+            .eq('post_id', widget.postItem['id'])
+            .eq('user_id', Supabase.instance.client.auth.currentUser!.id);
+
+        setState(() => likesCount--);
+      }
+
+      setState(() {
+        likeIcon = likeIcon == Icons.favorite_border_outlined
+            ? Icons.favorite_outlined
+            : Icons.favorite_border_outlined;
+      });
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
     }
-
-    await Supabase.instance.client
-        .from('posts')
-        .update({'likes': widget.postItem['likes']}).eq(
-            'post_id', widget.postItem['post_id']);
-
-    setState(() {
-      likeIcon = likeIcon == Icons.favorite_border_outlined
-          ? Icons.favorite_outlined
-          : Icons.favorite_border_outlined;
-      countLikes = widget.postItem['likes'].length;
-    });
   }
 
-  void onClickBookmarkButton() {
-    setState(() {
-      bookmarkIcon = bookmarkIcon == Icons.bookmark_border_outlined
-          ? Icons.bookmark_outlined
-          : Icons.bookmark_border_outlined;
-    });
+  // Handle the bookmark button click event
+  void onClickBookmarkButton() async {
+    try {
+      if (bookmarkIcon == Icons.bookmark_outlined) {
+      } else {}
+
+      setState(() {
+        bookmarkIcon = bookmarkIcon == Icons.bookmark_border_outlined
+            ? Icons.bookmark_outlined
+            : Icons.bookmark_border_outlined;
+      });
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
   }
 
+  // Handle the more button click event
   void onClickMoreButton() {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return const Column(
+        return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: Icon(
                 Icons.person_add_alt_1_outlined,
+                size: screenHeight * 0.03,
               ),
-              title: Text('Follow User'),
+              title: Text(
+                'Follow User',
+                style: TextStyle(fontSize: screenHeight * 0.017),
+              ),
             ),
             ListTile(
-              leading: Icon(LucideIcons.copy),
-              title: Text('Copy link'),
+              leading: Icon(
+                LucideIcons.copy,
+                size: screenHeight * 0.03,
+              ),
+              title: Text(
+                'Copy link',
+                style: TextStyle(fontSize: screenHeight * 0.017),
+              ),
             ),
             ListTile(
-              leading: Icon(Icons.block),
-              title: Text('Block User'),
+              leading: Icon(
+                Icons.block,
+                size: screenHeight * 0.03,
+              ),
+              title: Text(
+                'Block User',
+                style: TextStyle(fontSize: screenHeight * 0.017),
+              ),
             ),
             ListTile(
-              leading: Icon(LucideIcons.flag),
-              title: Text('Report Post'),
+              leading: Icon(
+                LucideIcons.flag,
+                size: screenHeight * 0.03,
+              ),
+              title: Text(
+                'Report Post',
+                style: TextStyle(fontSize: screenHeight * 0.017),
+              ),
             ),
           ],
         );
@@ -108,18 +168,69 @@ class _PostState extends State<Post> {
     );
   }
 
+  // Fetch comments
+  Future<void> _fetchComments() async {
+    try {
+      final data = await Supabase.instance.client
+          .from('comments')
+          .select()
+          .eq('post_id', widget.postItem['id'])
+          .count();
+
+      setState(() => commentsCount = data.count);
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
+  // Fetch likes
+  Future<void> _fetchLikes() async {
+    try {
+      final data = await Supabase.instance.client
+          .from('likes')
+          .select()
+          .eq('post_id', widget.postItem['id'])
+          .count();
+
+      setState(() => likesCount = data.count);
+
+      if (likesCount > 0) {
+        Supabase.instance.client
+            .from('likes')
+            .select()
+            .eq('post_id', widget.postItem['id'])
+            .eq('user_id', Supabase.instance.client.auth.currentUser!.id)
+            .then((value) {
+          if (value.isNotEmpty) {
+            setState(() => likeIcon = Icons.favorite_outlined);
+          }
+        });
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    imgList = widget.postItem['media'];
-    countLikes = widget.postItem['likes'].length;
-    countComments = widget.postItem['comments'].length;
+    _fetchComments();
+    _fetchLikes();
 
-    if (widget.postItem['likes'] != null &&
-        widget.postItem['likes']
-            .containsKey(Supabase.instance.client.auth.currentUser!.id)) {
-      likeIcon = Icons.favorite_outlined;
-    }
+    // Get the list of images from the post
+    imgList = widget.postItem['media'];
   }
 
   @override
@@ -135,7 +246,8 @@ class _PostState extends State<Post> {
           Row(
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: () =>
+                    context.go('/profile/${widget.postItem['user_id']}'),
                 child: CircleAvatar(
                   radius: screenHeight * 0.02,
                   backgroundImage: NetworkImage(widget.avatarUrl),
@@ -149,15 +261,19 @@ class _PostState extends State<Post> {
                   style: TextStyle(fontSize: screenHeight * 0.015),
                 ),
               ),
-              const Text(
+              Text(
                 " | ",
                 style: TextStyle(
+                  fontSize: screenHeight * 0.02,
                   fontWeight: FontWeight.w300,
                 ),
               ),
               Text(
                 getTimeDifference(widget.postItem['created_at']),
-                style: const TextStyle(fontWeight: FontWeight.w300),
+                style: TextStyle(
+                  fontSize: screenHeight * 0.015,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
               const Spacer(),
               InkWell(
@@ -217,7 +333,7 @@ class _PostState extends State<Post> {
                     ),
                     SizedBox(width: screenWidth * 0.01),
                     Text(
-                      countLikes.toString(),
+                      "$likesCount",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontSize: screenHeight * 0.015,
@@ -227,22 +343,18 @@ class _PostState extends State<Post> {
                 ),
               ),
               OutlinedButton(
-                onPressed: () => context.go(
-                  '/socials/post/${widget.postItem['post_id']}',
-                ),
+                onPressed: () =>
+                    context.go('/post/${widget.postItem['post_id']}'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize: Size(screenWidth * 0.2, screenHeight * 0.03),
+                  minimumSize: Size(screenWidth * 0.1, screenHeight * 0.03),
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      LucideIcons.messageCircle,
-                      size: screenHeight * 0.02,
-                    ),
+                    Icon(LucideIcons.messageCircle, size: screenHeight * 0.02),
                     SizedBox(width: screenWidth * 0.01),
                     Text(
-                      "$countComments comments",
+                      "$commentsCount",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontSize: screenHeight * 0.015,
@@ -257,10 +369,7 @@ class _PostState extends State<Post> {
                   minimumSize: Size(screenWidth * 0.1, screenHeight * 0.03),
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                 ),
-                child: Icon(
-                  LucideIcons.share2,
-                  size: screenHeight * 0.02,
-                ),
+                child: Icon(LucideIcons.share2, size: screenHeight * 0.02),
               ),
               OutlinedButton(
                 onPressed: onClickBookmarkButton,

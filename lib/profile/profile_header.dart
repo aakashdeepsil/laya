@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laya/constants.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class ProfileHeader extends StatefulWidget {
@@ -19,6 +20,9 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   int followingCount = 0;
   int followersCount = 0;
 
+  // Variable to store if the user is following the profile
+  bool isFollowing = false;
+
   // Function to get the following count
   Future<void> getFollowingCount() async {
     try {
@@ -30,21 +34,11 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       setState(() => followingCount = response.length);
     } on PostgrestException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${error.message}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showErrorSnackBar(context, error.message, screenHeight);
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${error.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showErrorSnackBar(context, error.toString(), screenHeight);
       }
     }
   }
@@ -60,21 +54,88 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       setState(() => followersCount = response.length);
     } on PostgrestException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${error.message}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showErrorSnackBar(context, error.message, screenHeight);
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${error.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
+  void checkIfFollowing() async {
+    try {
+      // Check if the user is already following the profile
+      final data = await Supabase.instance.client
+          .from('user_relationships')
+          .select()
+          .eq('follower_id', Supabase.instance.client.auth.currentUser!.id)
+          .eq('followed_id', widget.profile['id']);
+
+      if (data.isNotEmpty) {
+        isFollowing = true;
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
+  // Function to follow a user
+  void followUser() async {
+    try {
+      final response =
+          await Supabase.instance.client.from('user_relationships').insert({
+        'follower_id': Supabase.instance.client.auth.currentUser!.id,
+        'followed_id': widget.profile['id'],
+      });
+
+      if (response.error != null) {
+        if (mounted) {
+          showErrorSnackBar(context, response.error!.message, screenHeight);
+        }
+      } else {
+        setState(() => isFollowing = true);
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
+      }
+    }
+  }
+
+  // Function to unfollow a user
+  void unfollowUser() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('user_relationships')
+          .delete()
+          .eq('follower_id', Supabase.instance.client.auth.currentUser!.id)
+          .eq('followed_id', widget.profile['id']);
+
+      if (response.error != null) {
+        if (mounted) {
+          showErrorSnackBar(context, response.error!.message, screenHeight);
+        }
+      } else {
+        setState(() => isFollowing = false);
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.message, screenHeight);
+      }
+    } catch (error) {
+      if (mounted) {
+        showErrorSnackBar(context, error.toString(), screenHeight);
       }
     }
   }
@@ -82,6 +143,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   @override
   void initState() {
     super.initState();
+    checkIfFollowing();
     getFollowingCount();
     getFollowersCount();
   }
@@ -133,6 +195,16 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             fontWeight: FontWeight.w400,
           ),
         ),
+        SizedBox(height: screenHeight * 0.01),
+        widget.profile['id'] != Supabase.instance.client.auth.currentUser?.id
+            ? ElevatedButton(
+                onPressed: isFollowing ? unfollowUser : followUser,
+                child: Text(
+                  isFollowing ? 'Following' : 'Follow',
+                  style: TextStyle(fontSize: screenHeight * 0.02),
+                ),
+              )
+            : Container(),
       ],
     );
   }
