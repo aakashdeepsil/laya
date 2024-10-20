@@ -11,27 +11,27 @@ class Profile {
 
   Profile({
     required this.id,
-    required this.avatarUrl,
-    required this.bio,
+    this.avatarUrl = '',
+    this.bio = '',
     required this.createdAt,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    this.firstName = '',
+    this.lastName = '',
     required this.updatedAt,
-    required this.username,
+    this.username = '',
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
     return Profile(
       id: map['id'],
-      avatarUrl: map['avatar_url'],
-      bio: map['bio'],
+      avatarUrl: map['avatar_url'] ?? '',
+      bio: map['bio'] ?? '',
       createdAt: DateTime.parse(map['created_at']),
       email: map['email'],
-      firstName: map['first_name'],
-      lastName: map['last_name'],
+      firstName: map['first_name'] ?? '',
+      lastName: map['last_name'] ?? '',
       updatedAt: DateTime.parse(map['updated_at']),
-      username: map['username'],
+      username: map['username'] ?? '',
     );
   }
 

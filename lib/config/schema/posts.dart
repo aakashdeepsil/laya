@@ -2,7 +2,7 @@ class Post {
   final int id;
   final DateTime createdAt;
   final String description;
-  final String media;
+  final List<String> media;
   final String userId;
 
   Post({
@@ -18,7 +18,7 @@ class Post {
       id: map['id'],
       createdAt: DateTime.parse(map['created_at']),
       description: map['description'],
-      media: map['media'],
+      media: List<String>.from(map['media'] ?? []),
       userId: map['user_id'],
     );
   }
