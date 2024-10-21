@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/components/bottom_navigation_bar.dart';
+import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
 import 'package:laya/config/schema/posts.dart';
 import 'package:laya/config/schema/profiles.dart';
 import 'package:laya/config/supabase_config.dart';

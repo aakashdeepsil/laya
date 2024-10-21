@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/about_us.dart';
+import 'package:laya/features/about/presentation/about_us_page.dart';
 import 'package:laya/config/schema/profiles.dart';
 import 'package:laya/features/auth/presentation/complete_profile_page.dart';
 import 'package:laya/error.dart';

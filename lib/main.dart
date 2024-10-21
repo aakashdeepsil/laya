@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laya/config/supabase_config.dart';
-import 'package:laya/routes/routes.dart';
+import 'package:laya/routes/routes_config.dart';
 import 'package:laya/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 

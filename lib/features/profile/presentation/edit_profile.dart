@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/components/bottom_navigation_bar.dart';
+import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
 import 'package:laya/config/schema/profiles.dart';
 import 'package:laya/features/auth/data/profile_service.dart';
 import 'package:laya/features/profile/presentation/profile_avatar.dart';
