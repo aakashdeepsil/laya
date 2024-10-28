@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/config/supabase_config.dart';
-import 'package:laya/features/auth/data/profile_service.dart';
-import 'package:laya/config/schema/profiles.dart';
+import 'package:laya/config/schema/user.dart';
+import 'package:laya/features/auth/data/user_repository.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -12,7 +12,10 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  final ProfileService _profileService = ProfileService();
+  double get screenWidth => MediaQuery.of(context).size.width;
+  double get screenHeight => MediaQuery.of(context).size.height;
+
+  final UserRepository _userRepository = UserRepository();
 
   @override
   void initState() {
@@ -33,39 +36,44 @@ class _SplashPageState extends State<SplashPage> {
         return;
       }
 
-      final profileResponse = await _profileService.getProfile(session.user.id);
+      final userResponse = await _userRepository.getUser(session.user.id);
 
-      if (profileResponse == null) {
-        _showError('Profile not found');
+      if (userResponse == null) {
+        _showError('User profile not found');
         _navigateTo('/landing');
         return;
       }
 
-      final profile = Profile.fromMap(profileResponse);
+      final user = User.fromJson(userResponse);
 
-      if (_isProfileIncomplete(profile)) {
-        _navigateTo('/complete_profile', extra: profile);
+      if (_isUserProfileIncomplete(user)) {
+        _navigateTo('/complete_user_profile', extra: user);
         return;
       }
 
-      _navigateTo('/home', extra: profile);
+      _navigateTo('/home', extra: user);
     } catch (error) {
       _showError(error.toString());
       _navigateTo('/landing');
     }
   }
 
-  bool _isProfileIncomplete(Profile profile) {
-    return profile.firstName.isEmpty ||
-        profile.lastName.isEmpty ||
-        profile.avatarUrl.isEmpty ||
-        profile.bio.isEmpty ||
-        profile.username.isEmpty;
+  bool _isUserProfileIncomplete(User user) {
+    return user.firstName.isEmpty ||
+        user.lastName.isEmpty ||
+        user.bio.isEmpty ||
+        user.username.isEmpty;
   }
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $message')),
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+          'Error: $message',
+          style: TextStyle(fontSize: screenHeight * 0.02),
+        ),
+      ),
     );
   }
 
