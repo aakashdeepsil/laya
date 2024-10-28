@@ -2,21 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/config/schema/user.dart';
+import 'package:laya/config/supabase_config.dart';
 import 'package:laya/features/auth/data/user_repository.dart';
-import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
-import 'package:laya/config/schema/user.dart' as user_model;
-import 'package:laya/shared/widgets/user_profile/avatar_upload_widget.dart';
 
-class EditUserProfilePage extends StatefulWidget {
-  final user_model.User user;
+class CompleteUserProfilePage extends StatefulWidget {
+  final User user;
 
-  const EditUserProfilePage({super.key, required this.user});
+  const CompleteUserProfilePage({super.key, required this.user});
 
   @override
-  State<EditUserProfilePage> createState() => _EditUserProfilePageState();
+  State<CompleteUserProfilePage> createState() =>
+      _CompleteUserProfilePageState();
 }
 
-class _EditUserProfilePageState extends State<EditUserProfilePage> {
+class _CompleteUserProfilePageState extends State<CompleteUserProfilePage> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
@@ -24,29 +24,35 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   String _avatarUrl = '';
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _bioController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  final _bioController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   final UserRepository _userRepository = UserRepository();
 
-  @override
-  void initState() {
-    super.initState();
-    _getProfile();
-  }
-
   Future<void> _getProfile() async {
+    setState(() => _loading = true);
+
+    final userID = supabase.auth.currentUser?.id;
+
+    if (userID == null) {
+      context.go('/sign_in');
+      return;
+    }
+
     try {
-      setState(() => _loading = true);
+      final data = await _userRepository.getUser(userID);
+      if (data == null) {
+        throw Exception('Failed to load user information');
+      }
 
       setState(() {
-        _avatarUrl = widget.user.avatarUrl;
-        _bioController.text = widget.user.bio;
-        _firstNameController.text = widget.user.firstName;
-        _lastNameController.text = widget.user.lastName;
-        _usernameController.text = widget.user.username;
+        _avatarUrl = data['avatar_url'] ?? '';
+        _bioController.text = data['bio'] ?? '';
+        _firstNameController.text = data['first_name'] ?? '';
+        _lastNameController.text = data['last_name'] ?? '';
+        _usernameController.text = data['username'] ?? '';
       });
     } catch (error) {
       _showErrorSnackBar(error.toString());
@@ -55,84 +61,61 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     }
   }
 
-  Future<void> _onUpload(String imageUrl) async {
+  Future<void> _updateProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _loading = true);
+
+    final userID = supabase.auth.currentUser?.id;
+    if (userID == null) return;
+
+    final updates = {
+      'id': userID,
+      'avatar_url': _avatarUrl,
+      'bio': _bioController.text.trim(),
+      'username': _usernameController.text.trim(),
+      'first_name': _firstNameController.text.trim(),
+      'last_name': _lastNameController.text.trim(),
+    };
+
     try {
-      setState(() => _loading = true);
+      await _userRepository.updateUser(updates, userID);
 
-      final updatedProfile = widget.user.copyWith(avatarUrl: imageUrl).toJson();
+      final userResponse = await _userRepository.getUser(userID);
 
-      await _userRepository.updateUser(updatedProfile, widget.user.id);
+      if (userResponse == null) {
+        throw Exception('Failed to load user information');
+      }
 
-      setState(() => _avatarUrl = imageUrl);
+      final user = User.fromJson(userResponse);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Avatar updated successfully!'),
             backgroundColor: Theme.of(context).colorScheme.primary,
+            content: Text(
+              'Profile updated successfully!',
+              style: TextStyle(fontSize: screenHeight * 0.02),
+            ),
           ),
         );
+        context.go('/home', extra: user);
       }
     } catch (error) {
-      _showErrorSnackBar('Failed to update avatar: ${error.toString()}');
+      _showErrorSnackBar(error.toString());
     } finally {
       setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _updateProfile() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final updatedProfile = user_model.User(
-        id: widget.user.id,
-        avatarUrl: _avatarUrl,
-        bio: _bioController.text.trim(),
-        createdAt: widget.user.createdAt,
-        email: widget.user.email,
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        updatedAt: DateTime.now(),
-        username: _usernameController.text.trim(),
-      ).toJson();
-
-      try {
-        setState(() => _loading = true);
-
-        final userID = widget.user.id;
-
-        await _userRepository.updateUser(updatedProfile, userID);
-
-        final updatedUserProfile = await _userRepository.getUser(userID);
-
-        if (updatedUserProfile == null) {
-          throw Exception('Failed to load user information');
-        }
-
-        final user = user_model.User.fromJson(updatedUserProfile);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('User profile updated successfully!'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
-
-          context.go('/user_profile_page', extra: user);
-        }
-      } catch (error) {
-        print(error);
-        _showErrorSnackBar(error.toString());
-      } finally {
-        setState(() => _loading = false);
-      }
     }
   }
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
+        content: Text(
+          message,
+          style: TextStyle(fontSize: screenHeight * 0.02),
+        ),
       ),
     );
   }
@@ -150,8 +133,8 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     });
 
     try {
-      final isAvailable =
-          await _userRepository.isUsernameAvailable(username, widget.user.id);
+      final isAvailable = await _userRepository.isUsernameAvailable(
+          username, supabase.auth.currentUser?.id);
 
       if (mounted) {
         setState(() {
@@ -174,7 +157,14 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _getProfile();
+  }
+
+  @override
   void dispose() {
+    _bioController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _usernameController.dispose();
@@ -185,31 +175,27 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
-          "Edit Profile",
-          style: TextStyle(
-            fontSize: screenHeight * 0.02,
-            fontWeight: FontWeight.w600,
-          ),
+          'Complete Profile',
+          style: TextStyle(fontSize: screenHeight * 0.025),
         ),
         actions: [
           IconButton(
             icon: Icon(Icons.check, size: screenHeight * 0.03),
-            onPressed: _loading ? null : _updateProfile,
+            onPressed: _loading ? null : () => _updateProfile(),
           ),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.075),
+        child: Padding(
+          padding: EdgeInsets.all(screenWidth * 0.05),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: screenHeight * 0.02),
-              AvatarUploadWidget(
-                currentAvatarUrl: widget.user.avatarUrl,
-                onUpload: _onUpload,
-                isLoading: _loading,
-                userID: widget.user.id,
+              Text(
+                'Build your profile and connect with others!',
+                style: TextStyle(fontSize: screenHeight * 0.02),
               ),
               SizedBox(height: screenHeight * 0.025),
               Form(
@@ -228,12 +214,10 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: screenHeight * 0.025),
+                    SizedBox(height: screenHeight * 0.02),
                     TextFormField(
                       controller: _lastNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Last Name',
-                      ),
+                      decoration: const InputDecoration(labelText: 'Last Name'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your last name';
@@ -241,7 +225,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: screenHeight * 0.025),
+                    SizedBox(height: screenHeight * 0.02),
                     TextFormField(
                       controller: _usernameController,
                       decoration: InputDecoration(
@@ -272,11 +256,12 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: screenHeight * 0.025),
+                    SizedBox(height: screenHeight * 0.02),
                     TextFormField(
                       controller: _bioController,
                       decoration: const InputDecoration(
                         labelText: 'Bio',
+                        hintText: 'Tell us about yourself...',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -291,10 +276,6 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: MyBottomNavigationBar(
-        currentIndex: 4,
-        user: widget.user,
       ),
     );
   }

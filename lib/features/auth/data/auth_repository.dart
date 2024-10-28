@@ -6,7 +6,10 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    return supabase.auth.signUp(email: email, password: password);
+    return await supabase.auth.signUp(
+      email: email,
+      password: password,
+    );
   }
 
   Future<AuthResponse> signIn({
@@ -19,9 +22,7 @@ class AuthRepository {
     );
   }
 
-  Future<void> signOut() async {
-    await supabase.auth.signOut();
-  }
+  Future<void> signOut() async => await supabase.auth.signOut();
 
   User? get currentUser => supabase.auth.currentUser;
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/profiles.dart';
+import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/auth/data/auth_repository.dart';
-import 'package:laya/features/home/data/user_repository.dart';
+import 'package:laya/features/auth/data/auth_validator.dart';
+import 'package:laya/features/auth/data/user_repository.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,13 +16,18 @@ class _SignUpPageState extends State<SignUpPage> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController(text: '');
+  final _passwordController = TextEditingController(text: '');
 
   final _authRepository = AuthRepository();
-  final _UserRepository = UserRepository();
+  final _userRepository = UserRepository();
 
   Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    
     try {
       final response = await _authRepository.signUp(
         email: _emailController.text,
@@ -32,26 +38,36 @@ class _SignUpPageState extends State<SignUpPage> {
         throw Exception('Sign up failed');
       }
 
-      final profile = Profile(
-        id: response.user!.id,
-        email: response.user!.email!,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      final userResponse = await _userRepository.getUser(response.user!.id);
 
-      await _UserRepository.createUser(profile.toMap());
+      if (userResponse == null) {
+        throw Exception('Failed to load user information');
+      }
+
+      final user = User.fromJson(userResponse);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign up successful!')),
+          SnackBar(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              content: Text(
+                'Sign up successful!',
+                style: TextStyle(fontSize: screenHeight * 0.01),
+              )),
         );
 
-        context.push('/complete_profile', extra: response);
+        context.push('/complete_user_profile', extra: user);
       }
     } catch (error) {
+      print('Error: ${error.toString()}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${error.toString()}')),
+          SnackBar(
+            content: Text(
+              'Sign up failed. Please try again.',
+              style: TextStyle(fontSize: screenHeight * 0.01),
+            ),
+          ),
         );
       }
     }
@@ -66,32 +82,40 @@ class _SignUpPageState extends State<SignUpPage> {
           style: TextStyle(fontSize: screenHeight * 0.025),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            ElevatedButton(
-              onPressed: _signUp,
-              child: const Text('Sign Up'),
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            TextButton(
-              onPressed: () => context.push('/sign_in'),
-              child: const Text("Already have an account? Sign in"),
-            ),
-          ],
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: AuthValidator.validateEmail,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: AuthValidator.validatePassword,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              ElevatedButton(
+                onPressed: _signUp,
+                child: const Text('Sign Up'),
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              TextButton(
+                onPressed: () => context.push('/sign_in'),
+                child: Text(
+                  "Already have an account? Sign in",
+                  style: TextStyle(fontSize: screenHeight * 0.015),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
