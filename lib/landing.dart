@@ -20,8 +20,8 @@ class _LandingState extends State<Landing> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/laya_logo.jpeg'),
                 fit: BoxFit.fill,
+                image: AssetImage('assets/images/app_logo.png'),
               ),
             ),
           ),
@@ -43,9 +43,7 @@ class _LandingState extends State<Landing> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.04,
-                  ),
+                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.04),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -53,18 +51,14 @@ class _LandingState extends State<Landing> {
                         onPressed: () => context.push('/sign_in'),
                         child: Text(
                           "GET STARTED",
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.017,
-                          ),
+                          style: TextStyle(fontSize: screenHeight * 0.017),
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () => context.push('/about_us'),
                         child: Text(
                           "ABOUT US",
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.017,
-                          ),
+                          style: TextStyle(fontSize: screenHeight * 0.017),
                         ),
                       ),
                     ],
