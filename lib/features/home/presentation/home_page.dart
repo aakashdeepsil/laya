@@ -1,42 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/config/schema/series.dart';
+import 'package:laya/features/content/data/series_repository.dart';
 import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
-import 'package:laya/config/schema/profiles.dart';
+import 'package:laya/config/schema/user.dart';
 import 'package:laya/config/supabase_config.dart';
-import 'package:laya/components/content_carousel.dart';
-import 'package:laya/components/homepage_carousel.dart';
+import 'package:laya/shared/widgets/content/series_carousel_widget.dart';
+import 'package:laya/shared/widgets/homepage_carousel.dart';
 
 class HomePage extends StatefulWidget {
-  final Profile profile;
+  final User user;
 
-  const HomePage({super.key, required this.profile});
+  const HomePage({super.key, required this.user});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  List<String> anime = [
-    'https://qph.cf2.quoracdn.net/main-qimg-5abcf39750a6e0f1074f1249b66d6445',
-    'https://wallpapercave.com/wp/wp10508780.jpg',
-    'https://mlpnk72yciwc.i.optimole.com/cqhiHLc.IIZS~2ef73/w:auto/h:auto/q:75/https://bleedingcool.com/wp-content/uploads/2020/10/ChainsawMan_GN01_C1_Web-copy.jpg',
-    'https://upload.wikimedia.org/wikipedia/en/9/90/One_Piece%2C_Volume_61_Cover_%28Japanese%29.jpg',
-  ];
+  final SeriesRepository _seriesRepository = SeriesRepository();
 
-  List<String> titles = [
-    'My Hero Academia',
-    'Jujutsu Kaisen',
-    'Chainsawman',
-    'One Piece',
-  ];
+  List<Series> mostRecentlyAddedSeries = [];
+  bool isFetchingMostRecentlyAddedSeries = false;
 
   @override
   void initState() {
     super.initState();
     _checkProfileCompletion();
+    _loadMostRecentlyAddedSeries();
   }
 
   Future<void> _checkProfileCompletion() async {
@@ -50,16 +44,42 @@ class _HomePageState extends State<HomePage> {
           data['first_name'].isEmpty &&
           data['last_name'].isEmpty) {
         if (mounted) {
-          context.go('/complete_profile');
+          context.go('/complete_user_profile_page', extra: widget.user);
         }
       }
+    }
+  }
+
+  Future<void> _loadMostRecentlyAddedSeries() async {
+    try {
+      setState(() => isFetchingMostRecentlyAddedSeries = true);
+      final response = await _seriesRepository.getRecentlyAddedSeries();
+      mostRecentlyAddedSeries = response;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text(
+              'An error occurred while loading series. Please try again.',
+              style: TextStyle(fontSize: screenHeight * 0.02),
+            ),
+          ),
+        );
+      }
+    } finally {
+      setState(() => isFetchingMostRecentlyAddedSeries = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('LAYA')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text('LAYA', style: TextStyle(fontSize: screenHeight * 0.025)),
+      ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -67,24 +87,31 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const HomepageCarousel(),
+              HomepageCarousel(user: widget.user),
               SizedBox(height: screenHeight * 0.025),
-              _buildSectionTitle('Top WebToons'),
-              ContentCarousel(content: anime, titles: titles),
-              SizedBox(height: screenHeight * 0.025),
-              _buildSectionTitle('Continue Watching'),
-              ContentCarousel(content: anime, titles: titles),
-              SizedBox(height: screenHeight * 0.025),
-              _buildSectionTitle('Continue Reading'),
-              ContentCarousel(content: anime, titles: titles),
-              SizedBox(height: screenHeight * 0.025),
+              isFetchingMostRecentlyAddedSeries
+                  ? const Center(child: CircularProgressIndicator())
+                  : mostRecentlyAddedSeries.isNotEmpty
+                      ? _buildSectionTitle('Most Recently Added Series')
+                      : Container(),
+              isFetchingMostRecentlyAddedSeries
+                  ? Container()
+                  : SeriesCarousel(
+                      seriesList: mostRecentlyAddedSeries,
+                      onSeriesSelected: (series) {
+                        context.push(
+                          '/series_details_page',
+                          extra: {'series': series, 'user': widget.user},
+                        );
+                      },
+                    ),
             ],
           ),
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
         currentIndex: 0,
-        profile: widget.profile,
+        user: widget.user,
       ),
     );
   }
@@ -92,13 +119,13 @@ class _HomePageState extends State<HomePage> {
   Padding _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.only(
-        bottom: screenHeight * 0.01,
+        bottom: screenHeight * 0.005,
         left: screenWidth * 0.025,
       ),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: screenHeight * 0.025,
+          fontSize: screenHeight * 0.02,
           fontWeight: FontWeight.bold,
         ),
       ),
