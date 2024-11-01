@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/features/auth/data/user_repository.dart';
+import 'package:laya/features/profile/data/user_repository.dart';
 import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
 import 'package:laya/config/schema/user.dart' as user_model;
 import 'package:laya/shared/widgets/user_profile/avatar_upload_widget.dart';
@@ -20,9 +20,6 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  bool _loading = true;
-  String _avatarUrl = '';
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
@@ -30,6 +27,13 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   final TextEditingController _usernameController = TextEditingController();
 
   final UserRepository _userRepository = UserRepository();
+
+  final _debouncer = Debouncer(milliseconds: 500);
+  bool _isCheckingUsername = false;
+  String? _usernameError;
+
+  bool _loading = true;
+  String _avatarUrl = '';
 
   @override
   void initState() {
@@ -120,7 +124,6 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
           context.go('/user_profile_page', extra: user);
         }
       } catch (error) {
-        print(error);
         _showErrorSnackBar(error.toString());
       } finally {
         setState(() => _loading = false);
@@ -131,15 +134,14 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
+        content: Text(
+          message,
+          style: TextStyle(fontSize: screenHeight * 0.02),
+        ),
       ),
     );
   }
-
-  final _debouncer = Debouncer(milliseconds: 500);
-  bool _isCheckingUsername = false;
-  String? _usernameError;
 
   Future<void> _checkUsername(String username) async {
     if (username.isEmpty) return;
@@ -150,26 +152,17 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     });
 
     try {
-      final isAvailable =
-          await _userRepository.isUsernameAvailable(username, widget.user.id);
+      final isAvailable = await _userRepository.isUsernameAvailable(
+        username,
+        widget.user.id,
+      );
 
-      if (mounted) {
-        setState(() {
-          _usernameError = isAvailable ? null : 'Username is already taken';
-        });
-      }
+      setState(() =>
+          _usernameError = isAvailable ? null : 'Username is already taken');
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _usernameError = 'Error checking username';
-        });
-      }
+      setState(() => _usernameError = 'Error checking username');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isCheckingUsername = false;
-        });
-      }
+      setState(() => _isCheckingUsername = false);
     }
   }
 
@@ -248,20 +241,25 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
                         labelText: 'Username',
                         errorText: _usernameError,
                         suffixIcon: _isCheckingUsername
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                            ? SizedBox(
+                                width: screenWidth * 0.05,
+                                height: screenHeight * 0.05,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : _usernameError == null &&
                                     _usernameController.text.isNotEmpty
-                                ? const Icon(Icons.check, color: Colors.green)
+                                ? Icon(
+                                    Icons.check,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    size: screenHeight * 0.025,
+                                  )
                                 : null,
                       ),
-                      onChanged: (value) {
-                        _debouncer.run(() => _checkUsername(value));
-                      },
+                      onChanged: (value) =>
+                          _debouncer.run(() => _checkUsername(value)),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your username';

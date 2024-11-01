@@ -23,7 +23,7 @@ class _EditUserProfileButtonState extends State<EditUserProfileButton> {
         extra: widget.user,
       ),
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: Theme.of(context).primaryColor),
+        side: BorderSide(color: Theme.of(context).colorScheme.onSurface),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(screenHeight * 0.01),
         ),
