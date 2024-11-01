@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:laya/theme/theme.dart';
 
 class ThemeProvider with ChangeNotifier {
-  ThemeData _themeData = lightMode;
+  ThemeData _themeData = AppTheme.lightMode;
 
   ThemeProvider() {
     _loadTheme();
@@ -18,20 +18,22 @@ class ThemeProvider with ChangeNotifier {
   }
 
   void toggleTheme() {
-    _themeData = _themeData == lightMode ? darkMode : lightMode;
+    _themeData = _themeData == AppTheme.lightMode
+        ? AppTheme.darkMode
+        : AppTheme.lightMode;
     _saveTheme(_themeData);
     notifyListeners();
   }
 
   void _saveTheme(ThemeData themeData) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', themeData == darkMode);
+    prefs.setBool('isDarkMode', themeData == AppTheme.darkMode);
   }
 
   void _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    _themeData = isDarkMode ? darkMode : lightMode;
+    _themeData = isDarkMode ? AppTheme.darkMode : AppTheme.lightMode;
     notifyListeners();
   }
 }
