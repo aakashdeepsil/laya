@@ -47,7 +47,7 @@ class _SplashPageState extends State<SplashPage> {
       final user = User.fromJson(userResponse);
 
       if (_isUserProfileIncomplete(user)) {
-        _navigateTo('/complete_user_profile', extra: user);
+        _navigateTo('/complete_user_profile_page', extra: user);
         return;
       }
 
@@ -68,9 +68,9 @@ class _SplashPageState extends State<SplashPage> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).colorScheme.error,
         content: Text(
-          'Error: $message',
+          'Something went wrong. Please try again later.',
           style: TextStyle(fontSize: screenHeight * 0.02),
         ),
       ),
@@ -85,11 +85,8 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: const Center(child: CircularProgressIndicator()),
-      ),
+    return const Scaffold(
+      body: SafeArea(child: Center(child: CircularProgressIndicator())),
     );
   }
 }
