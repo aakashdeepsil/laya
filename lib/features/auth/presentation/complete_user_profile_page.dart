@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/user.dart';
 import 'package:laya/config/supabase_config.dart';
-import 'package:laya/features/auth/data/user_repository.dart';
+import 'package:laya/features/profile/data/user_repository.dart';
 
 class CompleteUserProfilePage extends StatefulWidget {
   final User user;

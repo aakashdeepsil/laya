@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/auth/data/auth_repository.dart';
 import 'package:laya/features/auth/data/auth_validator.dart';
-import 'package:laya/features/auth/data/user_repository.dart';
+import 'package:laya/features/profile/data/user_repository.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -27,7 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     try {
       final response = await _authRepository.signUp(
         email: _emailController.text,
@@ -49,17 +49,17 @@ class _SignUpPageState extends State<SignUpPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              content: Text(
-                'Sign up successful!',
-                style: TextStyle(fontSize: screenHeight * 0.01),
-              )),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            content: Text(
+              'Sign up successful!',
+              style: TextStyle(fontSize: screenHeight * 0.01),
+            ),
+          ),
         );
 
         context.push('/complete_user_profile', extra: user);
       }
     } catch (error) {
-      print('Error: ${error.toString()}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -85,7 +85,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Form(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.05),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

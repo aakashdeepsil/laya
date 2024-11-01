@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/user.dart' as user_model;
 import 'package:laya/features/auth/data/auth_repository.dart';
 import 'package:laya/features/auth/data/auth_validator.dart';
-import 'package:laya/features/auth/data/user_repository.dart';
+import 'package:laya/features/profile/data/user_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignInPage extends StatefulWidget {
@@ -50,7 +50,7 @@ class _SignInPageState extends State<SignInPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             content: Text(
               'Sign in successful!',
               style: TextStyle(fontSize: screenHeight * 0.015),
@@ -58,13 +58,13 @@ class _SignInPageState extends State<SignInPage> {
           ),
         );
 
-        context.push('/complete_user_profile', extra: user);
+        context.push('/home', extra: user);
       }
     } on PostgrestException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
             content: Text(
               error.message,
               style: TextStyle(fontSize: screenHeight * 0.015),
@@ -76,7 +76,7 @@ class _SignInPageState extends State<SignInPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
             content: Text(
               error.message,
               style: TextStyle(fontSize: screenHeight * 0.015),
@@ -88,7 +88,7 @@ class _SignInPageState extends State<SignInPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
             content: Text(
               'Error: ${error.toString()}',
               style: TextStyle(fontSize: screenHeight * 0.015),
