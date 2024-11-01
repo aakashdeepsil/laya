@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/profiles.dart';
+import 'package:laya/config/schema/user.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+  final String route;
+
+  _NavItem({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
+
+  BottomNavigationBarItem toBottomNavigationBarItem() =>
+      BottomNavigationBarItem(
+        icon: Icon(icon),
+        label: label,
+        tooltip: label,
+      );
+}
 
 class MyBottomNavigationBar extends StatefulWidget {
   final int currentIndex;
-  final Profile profile;
+  final User user;
 
   const MyBottomNavigationBar({
     super.key,
     required this.currentIndex,
-    required this.profile,
+    required this.user,
   });
 
   @override
@@ -42,7 +61,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     _NavItem(
       icon: LucideIcons.userCircle,
       label: 'Profile',
-      route: '/profile_page',
+      route: '/user_profile_page',
     ),
   ];
 
@@ -57,8 +76,11 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
         type: BottomNavigationBarType.fixed,
         currentIndex: widget.currentIndex,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        items:
-            _navItems.map((item) => item.toBottomNavigationBarItem()).toList(),
+        items: _navItems
+            .map(
+              (item) => item.toBottomNavigationBarItem(),
+            )
+            .toList(),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         selectedItemColor: Theme.of(context).colorScheme.primary,
@@ -68,27 +90,8 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     );
   }
 
-  void _onItemTapped(int index) {
-    if (index == 4) {
-      context.push('/profile_page', extra: widget.profile);
-      return;
-    }
-    context.push(_navItems[index].route);
-  }
-}
-
-class _NavItem {
-  final IconData icon;
-  final String label;
-  final String route;
-
-  _NavItem({required this.icon, required this.label, required this.route});
-
-  BottomNavigationBarItem toBottomNavigationBarItem() {
-    return BottomNavigationBarItem(
-      icon: Icon(icon),
-      label: label,
-      tooltip: label,
-    );
-  }
+  void _onItemTapped(int index) => context.push(
+        _navItems[index].route,
+        extra: widget.user,
+      );
 }
