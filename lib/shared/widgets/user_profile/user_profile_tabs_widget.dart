@@ -4,8 +4,13 @@ import 'package:laya/shared/widgets/user_profile/activity_view_widget.dart';
 
 class UserProfileTabs extends StatefulWidget {
   final User user;
+  final User currentUser;
 
-  const UserProfileTabs({super.key, required this.user});
+  const UserProfileTabs({
+    super.key,
+    required this.user,
+    required this.currentUser,
+  });
 
   @override
   State<UserProfileTabs> createState() => _UserProfileTabsState();

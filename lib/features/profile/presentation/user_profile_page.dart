@@ -9,8 +9,13 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 class UserProfilePage extends StatefulWidget {
   final User user;
+  final User currentUser;
 
-  const UserProfilePage({super.key, required this.user});
+  const UserProfilePage({
+    super.key,
+    required this.user,
+    required this.currentUser,
+  });
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -65,14 +70,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            UserProfileHeader(user: widget.user),
-            UserProfileTabs(user: widget.user),
+            UserProfileHeader(
+              user: widget.user,
+              currentUser: widget.currentUser,
+            ),
+            UserProfileTabs(
+              user: widget.user,
+              currentUser: widget.currentUser,
+            ),
           ],
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
         currentIndex: 4,
-        user: widget.user,
+        user: widget.currentUser,
       ),
     );
   }

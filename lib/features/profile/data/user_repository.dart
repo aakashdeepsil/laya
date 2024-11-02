@@ -63,4 +63,67 @@ class UserRepository {
       throw 'Failed to search users';
     }
   }
+
+  // Follow a user
+  Future<void> followUser(String userId) async {
+    try {
+      await supabase.from('followers').insert({
+        'follower_id': supabase.auth.currentUser!.id,
+        'following_id': userId,
+      });
+    } catch (e) {
+      throw 'Failed to follow user';
+    }
+  }
+
+  // Unfollow a user
+  Future<void> unfollowUser(String userId) async {
+    try {
+      await supabase
+          .from('followers')
+          .delete()
+          .eq('follower_id', supabase.auth.currentUser!.id)
+          .eq('following_id', userId);
+    } catch (e) {
+      throw 'Failed to unfollow user';
+    }
+  }
+
+  // Check if the current user is following another user
+  Future<bool> isFollowing(String userId) async {
+    try {
+      final response = await supabase
+          .from('followers')
+          .select()
+          .eq('follower_id', supabase.auth.currentUser!.id)
+          .eq('following_id', userId)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      throw 'Failed to check follow status';
+    }
+  }
+
+  // Get the number of followers and following for a user
+  Future<Map<String, dynamic>> getFollowCounts(String userId) async {
+    try {
+      final followers = await supabase
+          .from('followers')
+          .select('id')
+          .eq('following_id', userId);
+
+      final following = await supabase
+          .from('followers')
+          .select('id')
+          .eq('follower_id', userId);
+
+      return {
+        'followers': followers.length,
+        'following': following.length,
+      };
+    } catch (e) {
+      throw 'Failed to get follow counts';
+    }
+  }
 }
