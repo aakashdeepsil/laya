@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:laya/config/schema/content.dart';
+import 'package:laya/config/schema/series.dart';
 import 'package:laya/features/about/presentation/about_us_page.dart';
-import 'package:laya/config/schema/profiles.dart';
-import 'package:laya/features/auth/presentation/complete_profile_page.dart';
+import 'package:laya/config/schema/user.dart';
+import 'package:laya/features/auth/presentation/complete_user_profile_page.dart';
 import 'package:laya/error.dart';
 import 'package:laya/features/auth/presentation/sign_in_page.dart';
 import 'package:laya/features/auth/presentation/sign_up_page.dart';
+import 'package:laya/features/content/presentation/chapter/create_chapter_page.dart';
+import 'package:laya/features/content/presentation/chapter/content_viewer_page.dart';
+import 'package:laya/features/content/presentation/series/create_series_page.dart';
+import 'package:laya/features/content/presentation/series/edit_series_page.dart';
+import 'package:laya/features/content/presentation/series/series_details_page.dart';
+import 'package:laya/features/content/presentation/chapter/view_video_content_page.dart';
+import 'package:laya/features/explore/presentation/explore_page.dart';
 import 'package:laya/features/home/presentation/home_page.dart';
+import 'package:laya/features/library/presentations/library_page.dart';
+import 'package:laya/features/profile/presentation/update_password_page.dart';
+import 'package:laya/features/theme/change_theme_page.dart';
 import 'package:laya/features/profile/presentation/edit_profile.dart';
-import 'package:laya/features/profile/presentation/profile_page.dart';
-import 'package:laya/features/profile/presentation/profile_settings_page.dart';
+import 'package:laya/features/profile/presentation/user_profile_page.dart';
+import 'package:laya/features/profile/presentation/user_profile_settings_page.dart';
 import 'package:laya/landing.dart';
 import 'package:laya/splash.dart';
 
@@ -50,86 +62,118 @@ List<RouteBase> routes = [
       return const SignUpPage();
     },
   ),
-  // GoRoute(
-  //   path: 'update_password',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const UpdatePassword();
-  //   },
-  // ),
   GoRoute(
-    path: 'complete_profile',
+    path: 'complete_user_profile_page',
     builder: (BuildContext context, GoRouterState state) {
-      final profile = state.extra as Profile;
-      return CompleteProfilePage(profile: profile);
+      final user = state.extra as User;
+      return CompleteUserProfilePage(user: user);
     },
   ),
   GoRoute(
     path: 'home',
     builder: (BuildContext context, GoRouterState state) {
-      final profile = state.extra as Profile;
-      return HomePage(profile: profile);
-    },
-  ),
-  // GoRoute(
-  //   path: 'socials',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const Socials();
-  //   },
-  // ),
-  // GoRoute(
-  //   path: 'post_details/:postID',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     final extraData = state.extra as Map<String, dynamic>?;
-
-  //     return PostDetail(
-  //       postID: state.pathParameters['postID']!,
-  //       avatarURL: extraData?['avatarUrl'],
-  //       post: extraData?['postItem'],
-  //       username: extraData?['username'],
-  //     );
-  //   },
-  // ),
-  // GoRoute(
-  //   path: 'create_post',
-  //   builder: (BuildContext context, GoRouterState state) => const CreatePost(),
-  // ),
-  // GoRoute(
-  //   path: 'post_details/:postID/add_comment',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return AddCommentPage(postId: state.pathParameters['postID']!);
-  //   },
-  // ),
-  GoRoute(
-    path: 'profile_page',
-    builder: (BuildContext context, GoRouterState state) {
-      final profile = state.extra as Profile;
-      return ProfilePage(profile: profile);
+      final user = state.extra as User;
+      return HomePage(user: user);
     },
   ),
   GoRoute(
-    path: 'edit_profile',
+    path: 'explore',
     builder: (BuildContext context, GoRouterState state) {
-      final profile = state.extra as Profile;
-      return  EditProfilePage(profile: profile);
+      final user = state.extra as User;
+      return ExplorePage(user: user);
     },
   ),
   GoRoute(
-    path: 'profile_settings_page',
+    path: 'library',
     builder: (BuildContext context, GoRouterState state) {
-      final profile = state.extra as Profile;
-      return ProfileSettingsPage(profile: profile);
+      final user = state.extra as User;
+      return LibraryPage(user: user);
     },
   ),
-  // GoRoute(
-  //   path: 'update_password',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const UpdatePassword();
-  //   },
-  // ),
-  // GoRoute(
-  //   path: 'explore',
-  //   builder: (BuildContext context, GoRouterState state) {
-  //     return const Search();
-  //   },
-  // ),
+  GoRoute(
+    path: 'user_profile_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final user = extras['user'] as User;
+      final currentUser = extras['currentUser'] as User;
+      return UserProfilePage(user: user, currentUser: currentUser);
+    },
+  ),
+  GoRoute(
+    path: 'update_password_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final user = state.extra as User;
+      return UpdatePasswordPage(user: user);
+    },
+  ),
+  GoRoute(
+    path: 'edit_user_profile_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final user = state.extra as User;
+      return EditUserProfilePage(user: user);
+    },
+  ),
+  GoRoute(
+    path: 'user_profile_settings_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final user = state.extra as User;
+      return UserProfileSettingsPage(user: user);
+    },
+  ),
+  GoRoute(
+    path: 'change_theme_page',
+    builder: (BuildContext context, GoRouterState state) {
+      return const ChangeThemePage();
+    },
+  ),
+  GoRoute(
+    path: 'create_series_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final user = state.extra as User;
+      return CreateSeriesPage(user: user);
+    },
+  ),
+  GoRoute(
+    path: 'edit_series_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final series = extras['series'] as Series;
+      final user = extras['user'] as User;
+      return EditSeriesPage(series: series, user: user);
+    },
+  ),
+  GoRoute(
+    path: 'series_details_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final series = extras['series'] as Series;
+      final user = extras['user'] as User;
+      return SeriesDetailsPage(series: series, user: user);
+    },
+  ),
+  GoRoute(
+    path: 'create_chapter_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final user = state.extra as User;
+      return CreateChapterPage(user: user);
+    },
+  ),
+  GoRoute(
+    path: 'view_video_content_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final content = extras['content'] as dynamic;
+      final user = extras['user'] as User;
+      return ViewVideoContentPage(user: user, content: content);
+    },
+  ),
+  GoRoute(
+    path: 'content_details_page',
+    builder: (BuildContext context, GoRouterState state) {
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final content = extras['content'] as Content;
+      final user = extras['user'] as User;
+      return ContentViewerPage(content: content, user: user);
+    },
+  ),
 ];

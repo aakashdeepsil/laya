@@ -2,14 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:laya/config/schema/profiles.dart';
+import 'package:laya/config/schema/user.dart' as user_model;
 import 'package:laya/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreatePostPage extends StatefulWidget {
-  final Profile profile;
+  final user_model.User user;
 
-  const CreatePostPage({super.key, required this.profile});
+  const CreatePostPage({super.key, required this.user});
 
   @override
   State<CreatePostPage> createState() => _CreatePostPageState();
@@ -42,7 +42,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     setState(() => _loading = true);
 
     final description = _descriptionController.text.trim();
-    final userId = widget.profile.id;
+    final userId = widget.user.id;
 
     try {
       final response = await supabase
@@ -65,7 +65,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
       if (mounted) {
         _showSnackBar('Post created successfully.', Colors.green);
-        context.go('/profile_page', extra: widget.profile);
+        context.go('/profile_page', extra: widget.user);
       }
     } catch (error) {
       _showSnackBar('Failed to create post.', Colors.red);

@@ -90,8 +90,16 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     );
   }
 
-  void _onItemTapped(int index) => context.push(
-        _navItems[index].route,
-        extra: widget.user,
-      );
+  void _onItemTapped(int index) => index == 4
+      ? context.push(
+          _navItems[index].route,
+          extra: {
+            'user': widget.user,
+            'currentUser': widget.user,
+          },
+        )
+      : context.push(
+          _navItems[index].route,
+          extra: widget.user,
+        );
 }
