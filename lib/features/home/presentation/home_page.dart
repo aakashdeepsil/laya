@@ -4,9 +4,8 @@ import 'package:laya/config/schema/series.dart';
 import 'package:laya/features/content/data/series_repository.dart';
 import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
 import 'package:laya/config/schema/user.dart';
-import 'package:laya/config/supabase_config.dart';
 import 'package:laya/shared/widgets/content/series_carousel_widget.dart';
-import 'package:laya/shared/widgets/homepage_carousel.dart';
+import 'package:laya/shared/widgets/home/section_tile_widget.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -18,38 +17,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
+  double get screenWidth => MediaQuery.of(context).size.width;
 
   final SeriesRepository _seriesRepository = SeriesRepository();
 
   List<Series> mostRecentlyAddedSeries = [];
+
   bool isFetchingMostRecentlyAddedSeries = false;
 
   @override
   void initState() {
     super.initState();
-    _checkProfileCompletion();
     _loadMostRecentlyAddedSeries();
   }
 
-  Future<void> _checkProfileCompletion() async {
-    final userId = supabase.auth.currentUser?.id;
-
-    if (userId != null) {
-      final data =
-          await supabase.from('users').select().eq('id', userId).single();
-
-      if (data['username'].isEmpty &&
-          data['first_name'].isEmpty &&
-          data['last_name'].isEmpty) {
-        if (mounted) {
-          context.go('/complete_user_profile_page', extra: widget.user);
-        }
-      }
-    }
-  }
-
+  // Load most recently added series
   Future<void> _loadMostRecentlyAddedSeries() async {
     try {
       setState(() => isFetchingMostRecentlyAddedSeries = true);
@@ -87,12 +70,11 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              HomepageCarousel(user: widget.user),
-              SizedBox(height: screenHeight * 0.025),
+              SizedBox(height: screenHeight * 0.02),
               isFetchingMostRecentlyAddedSeries
                   ? const Center(child: CircularProgressIndicator())
                   : mostRecentlyAddedSeries.isNotEmpty
-                      ? _buildSectionTitle('Most Recently Added Series')
+                      ? const SectionTile(title: 'Recently Added')
                       : Container(),
               isFetchingMostRecentlyAddedSeries
                   ? Container()
@@ -101,7 +83,10 @@ class _HomePageState extends State<HomePage> {
                       onSeriesSelected: (series) {
                         context.push(
                           '/series_details_page',
-                          extra: {'series': series, 'user': widget.user},
+                          extra: {
+                            'series': series,
+                            'user': widget.user,
+                          },
                         );
                       },
                     ),
@@ -112,22 +97,6 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: MyBottomNavigationBar(
         currentIndex: 0,
         user: widget.user,
-      ),
-    );
-  }
-
-  Padding _buildSectionTitle(String title) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: screenHeight * 0.005,
-        left: screenWidth * 0.025,
-      ),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: screenHeight * 0.02,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
