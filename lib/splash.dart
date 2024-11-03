@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/config/supabase_config.dart';
 import 'package:laya/config/schema/user.dart';
-import 'package:laya/features/auth/data/user_repository.dart';
+import 'package:laya/features/profile/data/user_repository.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -12,8 +12,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
+  double get screenWidth => MediaQuery.of(context).size.width;
 
   final UserRepository _userRepository = UserRepository();
 
