@@ -9,6 +9,7 @@
 .history
 .svn/
 migrate_working_dir/
+.vscode/
 
 # IntelliJ related
 *.iml
@@ -44,3 +45,6 @@ app.*.map.json
 
 # Environment Variables
 .env
+
+# Keystore files
+upload-keystore.jks
