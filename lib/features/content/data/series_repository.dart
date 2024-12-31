@@ -113,13 +113,14 @@ class SeriesRepository {
     );
 
     try {
-      await supabase.storage.from('series_thumbnail').upload(fileName, file);
+      await supabase.storage.from('series_thumbnails').upload(fileName, file);
 
       final publicUrl =
-          supabase.storage.from('series_thumbnail').getPublicUrl(fileName);
+          supabase.storage.from('series_thumbnails').getPublicUrl(fileName);
 
       return publicUrl;
     } catch (error) {
+      print(error);
       throw 'Failed to upload the thumbnail. Please try again';
     }
   }
@@ -161,6 +162,9 @@ class SeriesRepository {
 
       return Series.fromJson(response);
     } catch (e) {
+      if (e.toString() == "Failed to upload the thumbnail. Please try again") {
+        throw 'Failed to upload the thumbnail. Please try again';
+      }
       throw 'Failed to create series. Please try again';
     }
   }
@@ -310,6 +314,141 @@ class SeriesRepository {
       return (response as List).map((json) => Series.fromJson(json)).toList();
     } catch (e) {
       throw 'Failed to load recently added series';
+    }
+  }
+
+  Future<List<Series>> getTopActionSeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '13b62026-afcf-415d-8e88-04fa3f4d528c')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top action series';
+    }
+  }
+
+  Future<List<Series>> getTopHorrorSeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '3aa4132f-cc87-4f2a-82f0-7abbdc9871ff')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top horror series';
+    }
+  }
+
+  Future<List<Series>> getTopMysterySeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '3e54bacc-a3e8-40ba-a839-551671c21826')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top mystery series';
+    }
+  }
+
+  Future<List<Series>> getTopDramaSeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', 'a1f94f2b-503e-45f7-ad3a-dfa05a5fd5e9')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top drama series';
+    }
+  }
+
+  Future<List<Series>> getTopRomanceSeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '5ceab106-d7ec-45f6-be16-a7faccd55103')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top romance series';
+    }
+  }
+
+  Future<List<Series>> getTopDocumentarySeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '60f3dcb4-455c-41dd-99b3-9f6e69b2d94b')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top documentary series';
+    }
+  }
+
+  Future<List<Series>> getTopComedySeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', 'c49b2292-ad05-429e-8789-9d81b3a7de39')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top comedy series';
+    }
+  }
+
+  Future<List<Series>> getTopSciFiSeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', 'a8e92f98-a66d-409a-a423-43a55aafcd75')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top sci-fi series';
+    }
+  }
+
+  Future<List<Series>> getTopFantasySeries() async {
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('category_id', '74f0c95b-3bdd-4213-8bd8-fb859a1782b3')
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      return (response as List).map((json) => Series.fromJson(json)).toList();
+    } catch (e) {
+      throw 'Failed to load top fantasy series';
     }
   }
 }

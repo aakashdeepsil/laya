@@ -52,20 +52,22 @@ class _SignUpPageState extends State<SignUpPage> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             content: Text(
               'Sign up successful!',
-              style: TextStyle(fontSize: screenHeight * 0.01),
+              style: TextStyle(fontSize: screenHeight * 0.02),
             ),
           ),
         );
 
-        context.push('/complete_user_profile', extra: user);
+        context.push('/complete_user_profile_page', extra: user);
       }
     } catch (error) {
+      print(error);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
             content: Text(
               'Sign up failed. Please try again.',
-              style: TextStyle(fontSize: screenHeight * 0.01),
+              style: TextStyle(fontSize: screenHeight * 0.02),
             ),
           ),
         );

@@ -118,10 +118,7 @@ class _CreateChapterPageState extends State<CreateChapterPage> {
 
   Future<void> _pickThumbnail() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
+      final result = await FilePicker.platform.pickFiles();
 
       if (result != null) {
         setState(() => _thumbnail = File(result.files.single.path!));

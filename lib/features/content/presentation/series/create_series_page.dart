@@ -73,10 +73,7 @@ class _CreateSeriesPageState extends State<CreateSeriesPage> {
   // Pick a thumbnail for the series
   Future<void> _pickThumbnail() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
 
       if (result == null) {
         return;
@@ -100,10 +97,7 @@ class _CreateSeriesPageState extends State<CreateSeriesPage> {
   // Pick a cover image for the series
   Future<void> _pickCoverImage() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
 
       if (result == null) {
         return;
@@ -222,8 +216,8 @@ class _CreateSeriesPageState extends State<CreateSeriesPage> {
           SnackBar(
             backgroundColor: Theme.of(context).colorScheme.error,
             content: Text(
-              'An error occurred while creating your series. Please try again.',
-              style: TextStyle(fontSize: screenHeight * 0.02),
+              error.toString(),
+              style: TextStyle(fontSize: screenHeight * 0.015),
             ),
           ),
         );

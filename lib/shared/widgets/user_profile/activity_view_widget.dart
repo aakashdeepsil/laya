@@ -57,7 +57,6 @@ class _ActivityViewState extends State<ActivityView> {
         ? const Center(child: CircularProgressIndicator())
         : ListView.separated(
             padding: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
-            physics: const NeverScrollableScrollPhysics(),
             itemCount: seriesCreatedByTheUser.length,
             separatorBuilder: (context, index) => Divider(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),

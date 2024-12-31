@@ -59,15 +59,15 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
                 extra: widget.user,
               ),
             ),
-            OptionTile(
-              icon: LucideIcons.messageSquarePlus,
-              title: 'Create New Post',
-              subtitle: 'Share your thoughts',
-              onTap: () => context.push(
-                '/create_post_page',
-                extra: widget.user,
-              ),
-            ),
+            // OptionTile(
+            //   icon: LucideIcons.messageSquarePlus,
+            //   title: 'Create New Post',
+            //   subtitle: 'Share your thoughts',
+            //   onTap: () => context.push(
+            //     '/create_post_page',
+            //     extra: widget.user,
+            //   ),
+            // ),
           ],
         ),
       ),

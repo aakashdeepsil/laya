@@ -19,7 +19,7 @@ import 'package:laya/features/home/presentation/home_page.dart';
 import 'package:laya/features/library/presentations/library_page.dart';
 import 'package:laya/features/profile/presentation/update_password_page.dart';
 import 'package:laya/features/theme/change_theme_page.dart';
-import 'package:laya/features/profile/presentation/edit_profile.dart';
+import 'package:laya/features/profile/presentation/edit_profile_page.dart';
 import 'package:laya/features/profile/presentation/user_profile_page.dart';
 import 'package:laya/features/profile/presentation/user_profile_settings_page.dart';
 import 'package:laya/landing.dart';

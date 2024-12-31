@@ -131,10 +131,7 @@ class _SignInPageState extends State<SignInPage> {
               SizedBox(height: screenHeight * 0.02),
               ElevatedButton(
                 onPressed: _signIn,
-                child: Text(
-                  'Sign In',
-                  style: TextStyle(fontSize: screenHeight * 0.015),
-                ),
+                child: const Text('Sign In'),
               ),
               SizedBox(height: screenHeight * 0.02),
               TextButton(

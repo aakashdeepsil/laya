@@ -156,7 +156,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        currentIndex: 3,
+        currentIndex: 2,
         user: widget.user,
       ),
     );

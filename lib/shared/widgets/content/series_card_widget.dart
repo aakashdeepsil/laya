@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 class SeriesCard extends StatefulWidget {
   final String? title;
-  final int? chapters;
   final String? thumbnailURL;
   final void Function() onTap;
 
   const SeriesCard({
     super.key,
     required this.title,
-    required this.chapters,
     required this.thumbnailURL,
     required this.onTap,
   });
@@ -42,30 +40,6 @@ class _SeriesCardState extends State<SeriesCard> {
                     height: screenHeight * 0.2,
                     color: Colors.grey,
                   ),
-            widget.chapters != null
-                ? Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.01,
-                        vertical: screenHeight * 0.0025,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius:
-                            BorderRadius.circular(screenHeight * 0.01),
-                      ),
-                      child: Text(
-                        widget.chapters.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
             Positioned(
               bottom: 0,
               left: 0,
@@ -84,8 +58,9 @@ class _SeriesCardState extends State<SeriesCard> {
                 ),
                 child: Text(
                   widget.title ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: screenHeight * 0.017,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

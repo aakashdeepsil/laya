@@ -43,8 +43,7 @@ class _SeriesCarouselState extends State<SeriesCarousel> {
             margin: EdgeInsets.only(right: screenWidth * 0.03),
             width: screenWidth * 0.3,
             child: SeriesCard(
-              title: null,
-              chapters: null,
+              title: series.title,
               thumbnailURL: series.thumbnailUrl,
               onTap: () => widget.onSeriesSelected?.call(series),
             ),

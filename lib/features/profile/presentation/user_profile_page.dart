@@ -82,7 +82,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        currentIndex: 4,
+        currentIndex: 3,
         user: widget.currentUser,
       ),
     );

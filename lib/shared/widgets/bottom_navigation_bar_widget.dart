@@ -49,11 +49,6 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
       route: '/explore',
     ),
     _NavItem(
-      icon: Icons.people_alt_outlined,
-      label: 'Socials',
-      route: '/socials',
-    ),
-    _NavItem(
       icon: LucideIcons.library,
       label: 'Library',
       route: '/library',
@@ -85,12 +80,15 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
         showUnselectedLabels: true,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-        onTap: (index) => _onItemTapped(index),
+        onTap: (index) {
+          print('index: $index');
+          _onItemTapped(index);
+        },
       ),
     );
   }
 
-  void _onItemTapped(int index) => index == 4
+  void _onItemTapped(int index) => index == 3
       ? context.push(
           _navItems[index].route,
           extra: {

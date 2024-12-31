@@ -274,6 +274,8 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
                             SizedBox(height: screenHeight * 0.01),
                             Text(
                               widget.series.description,
+                              maxLines: 6,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: screenHeight * 0.015),
                             ),
                           ],
@@ -343,13 +345,19 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
                       ),
                       title: Text(
                         seriesContent[index].title,
-                        style: TextStyle(fontSize: screenHeight * 0.02),
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.015,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       subtitle: Text(
                         seriesContent[index].description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: screenHeight * 0.015),
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.015,
+                          fontWeight: FontWeight.w200,
+                        ),
                       ),
                       trailing: Icon(
                         LucideIcons.chevronRight,

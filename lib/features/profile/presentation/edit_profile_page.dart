@@ -291,7 +291,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        currentIndex: 4,
+        currentIndex: 3,
         user: widget.user,
       ),
     );
