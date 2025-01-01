@@ -30,8 +30,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final response = await _authRepository.signUp(
-        email: _emailController.text,
-        password: _passwordController.text,
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
       if (response.user == null) {

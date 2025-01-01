@@ -31,8 +31,8 @@ class _SignInPageState extends State<SignInPage> {
 
     try {
       final response = await _authRepository.signIn(
-        email: _emailController.text,
-        password: _passwordController.text,
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
       if (response.user == null) {
