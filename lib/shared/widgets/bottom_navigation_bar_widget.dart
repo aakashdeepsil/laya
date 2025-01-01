@@ -70,7 +70,6 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
       child: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: widget.currentIndex,
-        backgroundColor: Theme.of(context).colorScheme.surface,
         items: _navItems
             .map(
               (item) => item.toBottomNavigationBarItem(),
@@ -78,12 +77,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
             .toList(),
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-        onTap: (index) {
-          print('index: $index');
-          _onItemTapped(index);
-        },
+        onTap: (index) => _onItemTapped(index),
       ),
     );
   }

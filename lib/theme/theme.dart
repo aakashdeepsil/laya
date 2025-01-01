@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Colors
-  static const _primary = Color.fromRGBO(67, 176, 42, 1);
+  static const _primary = Color.fromRGBO(44, 102, 31, 1);
   static const _secondary = Color.fromRGBO(206, 159, 81, 1);
   static const _surface = Color(0xFF121212);
   static const _error = Color(0xFFCF6679);
@@ -114,12 +114,12 @@ class AppTheme {
 
     // AppBar Theme
     appBarTheme: AppBarTheme(
-      backgroundColor: _surface,
+      backgroundColor: _primary,
       elevation: 0,
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: _secondary,
       ),
       iconTheme: const IconThemeData(color: Colors.white),
     ),
@@ -267,12 +267,12 @@ class AppTheme {
 
     // AppBar Theme
     appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: _primary,
       elevation: 0,
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF121212),
+        color: _secondary,
       ),
       iconTheme: const IconThemeData(color: Color(0xFF121212)),
     ),
@@ -325,6 +325,22 @@ class AppTheme {
     // Icon Theme
     iconTheme: const IconThemeData(
       color: _primary,
+    ),
+
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: _primary,
+      selectedItemColor: _secondary,
+      unselectedItemColor: Colors.white,
+      selectedLabelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+      unselectedLabelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.1,
+      ),
     ),
   );
 }
