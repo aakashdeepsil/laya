@@ -1,7 +1,7 @@
 name: laya
 description: LAYA brings the worlds of webtoons and social media together in one place. Share your stories, connect with other creators, and discover new comics to read.
 publish_to: 'none'
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
