@@ -1,4 +1,4 @@
-package com.example.laya
+package com.bluefyreentertainment
 
 import io.flutter.embedding.android.FlutterActivity
 
