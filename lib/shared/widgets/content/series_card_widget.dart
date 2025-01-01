@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laya/shared/widgets/cached_image_widget.dart';
 
 class SeriesCard extends StatefulWidget {
   final String? title;
@@ -29,8 +30,8 @@ class _SeriesCardState extends State<SeriesCard> {
         child: Stack(
           children: [
             widget.thumbnailURL != null
-                ? Image.network(
-                    widget.thumbnailURL!,
+                ? CachedImageWidget(
+                    imageUrl: widget.thumbnailURL!,
                     width: screenWidth * 0.4,
                     height: screenHeight * 0.2,
                     fit: BoxFit.cover,

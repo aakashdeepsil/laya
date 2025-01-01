@@ -274,19 +274,25 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(height: screenHeight * 0.02),
-              isFetchingMostRecentlyAddedSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : mostRecentlyAddedSeries.isNotEmpty
-                      ? const SectionTile(title: 'Recently Added')
-                      : Container(),
-              isFetchingMostRecentlyAddedSeries
-                  ? Container()
-                  : SeriesCarousel(
+          child: isFetchingMostRecentlyAddedSeries &&
+                  isActionSeries &&
+                  isHorrorSeries &&
+                  isMysterySeries &&
+                  isRomanceSeries &&
+                  isDocumentarySeries &&
+                  isComedySeries &&
+                  isDramaSeries &&
+                  isSciFiSeries
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: screenHeight * 0.02),
+                    mostRecentlyAddedSeries.isNotEmpty
+                        ? const SectionTile(title: 'Recently Added')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: mostRecentlyAddedSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -298,15 +304,11 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              SizedBox(height: screenHeight * 0.02),
-              isActionSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topActionSeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Action Series')
-                      : Container(),
-              isActionSeries
-                  ? Container()
-                  : SeriesCarousel(
+                    SizedBox(height: screenHeight * 0.02),
+                    topActionSeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Action Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topActionSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -318,15 +320,11 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              SizedBox(height: screenHeight * 0.02),
-              isHorrorSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topHorrorSeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Horror Series')
-                      : Container(),
-              isHorrorSeries
-                  ? Container()
-                  : SeriesCarousel(
+                    SizedBox(height: screenHeight * 0.02),
+                    topHorrorSeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Horror Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topHorrorSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -338,15 +336,11 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              SizedBox(height: screenHeight * 0.02),
-              isMysterySeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topMysterySeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Mystery Series')
-                      : Container(),
-              isMysterySeries
-                  ? Container()
-                  : SeriesCarousel(
+                    SizedBox(height: screenHeight * 0.02),
+                    topMysterySeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Mystery Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topMysterySeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -358,15 +352,11 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              SizedBox(height: screenHeight * 0.02),
-              isRomanceSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topRomanceSeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Romance Series')
-                      : Container(),
-              isRomanceSeries
-                  ? Container()
-                  : SeriesCarousel(
+                    SizedBox(height: screenHeight * 0.02),
+                    topRomanceSeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Romance Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topRomanceSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -378,53 +368,49 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              // SizedBox(height: screenHeight * 0.02),
-              // isDocumentarySeries
-              //     ? const Center(child: CircularProgressIndicator())
-              //     : topDocumentarySeries.isNotEmpty
-              //         ? const SectionTile(title: 'Top Documentary Series')
-              //         : Container(),
-              // if (isDocumentarySeries)
-              //   SeriesCarousel(
-              //     seriesList: topDocumentarySeries,
-              //     onSeriesSelected: (series) {
-              //       context.push(
-              //         '/series_details_page',
-              //         extra: {
-              //           'series': series,
-              //           'user': widget.user,
-              //         },
-              //       );
-              //     },
-              //   ),
-              // SizedBox(height: screenHeight * 0.02),
-              // isComedySeries
-              //     ? const Center(child: CircularProgressIndicator())
-              //     : topComedySeries.isNotEmpty
-              //         ? const SectionTile(title: 'Top Comedy Series')
-              //         : Container(),
-              // if (isComedySeries)
-              //   SeriesCarousel(
-              //     seriesList: topComedySeries,
-              //     onSeriesSelected: (series) {
-              //       context.push(
-              //         '/series_details_page',
-              //         extra: {
-              //           'series': series,
-              //           'user': widget.user,
-              //         },
-              //       );
-              //     },
-              //   ),
-              SizedBox(height: screenHeight * 0.02),
-              isDramaSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topDramaSeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Drama Series')
-                      : Container(),
-              isDramaSeries
-                  ? Container()
-                  : SeriesCarousel(
+                    // SizedBox(height: screenHeight * 0.02),
+                    // isDocumentarySeries
+                    //     ? const Center(child: CircularProgressIndicator())
+                    //     : topDocumentarySeries.isNotEmpty
+                    //         ? const SectionTile(title: 'Top Documentary Series')
+                    //         : Container(),
+                    // if (isDocumentarySeries)
+                    //   SeriesCarousel(
+                    //     seriesList: topDocumentarySeries,
+                    //     onSeriesSelected: (series) {
+                    //       context.push(
+                    //         '/series_details_page',
+                    //         extra: {
+                    //           'series': series,
+                    //           'user': widget.user,
+                    //         },
+                    //       );
+                    //     },
+                    //   ),
+                    // SizedBox(height: screenHeight * 0.02),
+                    // isComedySeries
+                    //     ? const Center(child: CircularProgressIndicator())
+                    //     : topComedySeries.isNotEmpty
+                    //         ? const SectionTile(title: 'Top Comedy Series')
+                    //         : Container(),
+                    // if (isComedySeries)
+                    //   SeriesCarousel(
+                    //     seriesList: topComedySeries,
+                    //     onSeriesSelected: (series) {
+                    //       context.push(
+                    //         '/series_details_page',
+                    //         extra: {
+                    //           'series': series,
+                    //           'user': widget.user,
+                    //         },
+                    //       );
+                    //     },
+                    //   ),
+                    SizedBox(height: screenHeight * 0.02),
+                    topDramaSeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Drama Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topDramaSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -436,15 +422,11 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-              SizedBox(height: screenHeight * 0.02),
-              isSciFiSeries
-                  ? const Center(child: CircularProgressIndicator())
-                  : topSciFiSeries.isNotEmpty
-                      ? const SectionTile(title: 'Top Sci-Fi Series')
-                      : Container(),
-              isSciFiSeries
-                  ? Container()
-                  : SeriesCarousel(
+                    SizedBox(height: screenHeight * 0.02),
+                    topSciFiSeries.isNotEmpty
+                        ? const SectionTile(title: 'Top Sci-Fi Series')
+                        : Container(),
+                    SeriesCarousel(
                       seriesList: topSciFiSeries,
                       onSeriesSelected: (series) {
                         context.push(
@@ -456,8 +438,8 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-            ],
-          ),
+                  ],
+                ),
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
