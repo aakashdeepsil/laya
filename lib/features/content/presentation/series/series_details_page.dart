@@ -6,6 +6,7 @@ import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/content/data/content_repository.dart';
 import 'package:laya/features/content/data/series_repository.dart';
 import 'package:laya/features/library/data/library_repository.dart';
+import 'package:laya/shared/widgets/cached_image_widget.dart';
 import 'package:laya/shared/widgets/content/delete_alert_dialog_widget.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -188,7 +189,10 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(widget.series.coverImageUrl, fit: BoxFit.cover),
+                  CachedImageWidget(
+                    imageUrl: widget.series.coverImageUrl,
+                    fit: BoxFit.cover,
+                  ),
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -252,8 +256,8 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          widget.series.thumbnailUrl,
+                        child: CachedImageWidget(
+                          imageUrl: widget.series.thumbnailUrl,
                           width: screenWidth * 0.25,
                           height: screenHeight * 0.175,
                           fit: BoxFit.cover,
@@ -337,8 +341,8 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
                           'user': widget.user,
                         });
                       },
-                      leading: Image.network(
-                        seriesContent[index].thumbnailUrl,
+                      leading: CachedImageWidget(
+                        imageUrl: seriesContent[index].thumbnailUrl,
                         width: screenWidth * 0.2,
                         height: screenHeight * 0.2,
                         fit: BoxFit.cover,

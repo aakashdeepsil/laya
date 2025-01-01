@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/series.dart';
 import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/content/data/series_repository.dart';
+import 'package:laya/shared/widgets/cached_image_widget.dart';
 
 class ActivityView extends StatefulWidget {
   final User user;
@@ -65,8 +66,8 @@ class _ActivityViewState extends State<ActivityView> {
             itemBuilder: (context, index) {
               final series = seriesCreatedByTheUser[index];
               return ListTile(
-                leading: Image.network(
-                  series.thumbnailUrl,
+                leading: CachedImageWidget(
+                  imageUrl: series.thumbnailUrl,
                   fit: BoxFit.cover,
                   height: screenHeight * 0.2,
                 ),

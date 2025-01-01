@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/posts.dart';
 import 'package:laya/config/supabase_config.dart';
+import 'package:laya/shared/widgets/cached_image_widget.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class PostWidget extends StatefulWidget {
@@ -179,8 +180,8 @@ class _PostWidgetState extends State<PostWidget> {
             SizedBox(height: screenHeight * 0.01),
           if (widget.post.media.isNotEmpty)
             ...widget.post.media.map(
-              (imageURL) => Image.network(
-                imageURL,
+              (imageURL) => CachedImageWidget(
+                imageUrl: imageURL,
                 fit: BoxFit.cover,
                 height: screenHeight * 0.3,
                 width: screenWidth,
