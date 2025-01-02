@@ -70,6 +70,7 @@ class _ActivityViewState extends State<ActivityView> {
                   imageUrl: series.thumbnailUrl,
                   fit: BoxFit.cover,
                   height: screenHeight * 0.2,
+                  width: screenWidth * 0.3,
                 ),
                 title: Text(
                   series.title,

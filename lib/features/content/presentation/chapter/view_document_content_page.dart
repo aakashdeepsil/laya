@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/content.dart';
 import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/content/data/content_repository.dart';
+import 'package:laya/shared/widgets/cached_document_widget.dart';
 import 'package:laya/shared/widgets/content/delete_alert_dialog_widget.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class ViewDocumentContentPage extends StatefulWidget {
   final Content content;
@@ -27,7 +27,7 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
 
   final ContentRepository _contentRepository = ContentRepository();
 
-  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
+  // final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
 
   int _currentPage = 0;
   int _totalPages = 0;
@@ -144,31 +144,105 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
         centerTitle: true,
         title: Text(
           widget.content.title,
-          style: TextStyle(fontSize: screenHeight * 0.025),
+          style: TextStyle(fontSize: screenHeight * 0.02),
         ),
         actions: widget.content.creatorId == widget.user.id
             ? [
-                IconButton(
-                  icon: Icon(Icons.edit, size: screenHeight * 0.025),
-                  onPressed: () => context.push('/edit_content_page', extra: {
-                    'content': widget.content,
-                    'user': widget.user,
-                  }),
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert, size: screenHeight * 0.025),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 1,
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.edit,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        title: Text(
+                          'Edit',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontSize: screenHeight * 0.02,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context); // Close the popup menu
+                          context.push('/edit_content_page', extra: {
+                            'content': widget.content,
+                            'user': widget.user,
+                          });
+                        },
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 2,
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        title: Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: screenHeight * 0.02,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () {
+                          _showDeleteConfirmation();
+                          context.pop();
+                        },
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 3,
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.publish,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(
+                          'Publish',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: screenHeight * 0.02,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context); // Close the popup menu
+                          // Add your publish logic here
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete, size: screenHeight * 0.025),
-                  onPressed: _showDeleteConfirmation,
-                )
               ]
             : [],
       ),
       body: SafeArea(
         child: Stack(
           children: [
-            SfPdfViewer.network(
-              key: _pdfViewerKey,
-              widget.content.mediaUrl,
-              canShowPaginationDialog: false,
+            // SfPdfViewer.network(
+            //   key: _pdfViewerKey,
+            //   widget.content.mediaUrl,
+            //   canShowPaginationDialog: false,
+            //   initialPageNumber: _currentPage,
+            //   onDocumentLoaded: (details) {
+            //     setState(() => _totalPages = details.document.pages.count);
+            //   },
+            //   onPageChanged: (details) {
+            //     setState(() {
+            //       _currentPage = details.newPageNumber - 1;
+            //       _readingProgress = _currentPage / (_totalPages - 1);
+            //     });
+            //     _saveReadingProgress();
+            //   },
+            // ),
+            CachedPdfViewer(
+              mediaUrl: widget.content.mediaUrl,
               initialPageNumber: _currentPage,
               onDocumentLoaded: (details) {
                 setState(() => _totalPages = details.document.pages.count);
@@ -180,6 +254,7 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
                 });
                 _saveReadingProgress();
               },
+              canShowPaginationDialog: false,
             ),
           ],
         ),
