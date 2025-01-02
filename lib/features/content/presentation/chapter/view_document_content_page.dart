@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/config/schema/content.dart';
 import 'package:laya/config/schema/user.dart';
+import 'package:laya/enums/content_status.dart';
 import 'package:laya/features/content/data/content_repository.dart';
 import 'package:laya/shared/widgets/cached_document_widget.dart';
 import 'package:laya/shared/widgets/content/delete_alert_dialog_widget.dart';
@@ -26,8 +27,6 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
   double get screenWidth => MediaQuery.of(context).size.width;
 
   final ContentRepository _contentRepository = ContentRepository();
-
-  // final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
 
   int _currentPage = 0;
   int _totalPages = 0;
@@ -137,6 +136,40 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
     }
   }
 
+  // Update the content status
+  Future<void> updateContentStatus() async {
+    try {
+      await _contentRepository.updateContentStatus(
+        contentId: widget.content.id,
+        status: ContentStatus.published,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            content: Text(
+              'Chapter published successfully.',
+              style: TextStyle(fontSize: screenHeight * 0.02),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text(
+              'Failed to publish the chapter.',
+              style: TextStyle(fontSize: screenHeight * 0.02),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,7 +200,7 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
                           ),
                         ),
                         onTap: () {
-                          Navigator.pop(context); // Close the popup menu
+                          context.pop(); // Close the popup menu
                           context.push('/edit_content_page', extra: {
                             'content': widget.content,
                             'user': widget.user,
@@ -191,8 +224,8 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
                           ),
                         ),
                         onTap: () {
-                          _showDeleteConfirmation();
                           context.pop();
+                          _showDeleteConfirmation();
                         },
                       ),
                     ),
@@ -212,35 +245,19 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
                           ),
                         ),
                         onTap: () {
-                          Navigator.pop(context); // Close the popup menu
-                          // Add your publish logic here
+                          context.pop(); // Close the popup menu
+                          updateContentStatus();
                         },
                       ),
                     ),
                   ],
                 ),
               ]
-            : [],
+            : null,
       ),
       body: SafeArea(
         child: Stack(
           children: [
-            // SfPdfViewer.network(
-            //   key: _pdfViewerKey,
-            //   widget.content.mediaUrl,
-            //   canShowPaginationDialog: false,
-            //   initialPageNumber: _currentPage,
-            //   onDocumentLoaded: (details) {
-            //     setState(() => _totalPages = details.document.pages.count);
-            //   },
-            //   onPageChanged: (details) {
-            //     setState(() {
-            //       _currentPage = details.newPageNumber - 1;
-            //       _readingProgress = _currentPage / (_totalPages - 1);
-            //     });
-            //     _saveReadingProgress();
-            //   },
-            // ),
             CachedPdfViewer(
               mediaUrl: widget.content.mediaUrl,
               initialPageNumber: _currentPage,

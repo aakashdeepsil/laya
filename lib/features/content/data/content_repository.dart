@@ -332,4 +332,19 @@ class ContentRepository {
       throw 'Failed to load content';
     }
   }
+
+  // Update content status
+  Future<void> updateContentStatus({
+    required String contentId,
+    required ContentStatus status,
+  }) async {
+    try {
+      await supabase.from('content').update({
+        'status': status.name,
+        'published_at': DateTime.now().toIso8601String(),
+      }).eq('id', contentId);
+    } catch (e) {
+      throw 'Failed to update content status';
+    }
+  }
 }
