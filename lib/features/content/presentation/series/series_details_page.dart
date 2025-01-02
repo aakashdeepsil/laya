@@ -210,26 +210,79 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
             ),
             actions: isCreator
                 ? [
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit,
-                        color: Colors.white,
-                        size: screenHeight * 0.03,
-                      ),
-                      onPressed: () {
-                        context.push('/edit_series_page', extra: {
-                          'series': widget.series,
-                          'user': widget.user,
-                        });
-                      },
-                    ),
-                    IconButton(
-                      onPressed: isDeleting ? null : _showDeleteConfirmation,
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: screenHeight * 0.03,
-                      ),
+                    PopupMenuButton<int>(
+                      icon: Icon(Icons.more_vert, size: screenHeight * 0.025),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 1,
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.edit,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                            title: Text(
+                              'Edit',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.secondary,
+                                fontSize: screenHeight * 0.02,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onTap: () {
+                              context.pop();
+                              context.push('/edit_series_page', extra: {
+                                'series': widget.series,
+                                'user': widget.user,
+                              });
+                            },
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 2,
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.delete,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            title: Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: screenHeight * 0.02,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onTap: () {
+                              context.pop();
+                              _showDeleteConfirmation();
+                            },
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 3,
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.add,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: Text(
+                              'Add a new chapter',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: screenHeight * 0.02,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onTap: () {
+                              context.pop();
+                              context.push(
+                                '/create_chapter_page',
+                                extra: widget.user,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ]
                 : null,
@@ -296,21 +349,32 @@ class _SeriesDetailsPageState extends State<SeriesDetailsPage> {
                       onPressed: () {
                         context.push('');
                       },
-                      icon: Icon(Icons.play_arrow, size: screenHeight * 0.025),
+                      icon: Icon(
+                        Icons.play_arrow,
+                        color: Theme.of(context).colorScheme.secondary,
+                        size: screenHeight * 0.025,
+                      ),
                       label: Text(
                         'Start Reading',
-                        style: TextStyle(fontSize: screenHeight * 0.015),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontSize: screenHeight * 0.015,
+                        ),
                       ),
                     ),
                     ElevatedButton.icon(
                       onPressed: _toggleLibrary,
                       icon: Icon(
                         inLibrary ? Icons.check : Icons.add,
+                        color: Theme.of(context).colorScheme.secondary,
                         size: screenHeight * 0.025,
                       ),
                       label: Text(
                         inLibrary ? 'In Library' : 'Add to Library',
-                        style: TextStyle(fontSize: screenHeight * 0.015),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontSize: screenHeight * 0.015,
+                        ),
                       ),
                     ),
                   ],
