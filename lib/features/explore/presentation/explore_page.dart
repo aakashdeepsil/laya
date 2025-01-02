@@ -7,6 +7,7 @@ import 'package:laya/config/schema/user.dart';
 import 'package:laya/features/profile/data/user_repository.dart';
 import 'package:laya/features/content/data/series_repository.dart';
 import 'package:laya/shared/widgets/bottom_navigation_bar_widget.dart';
+import 'package:laya/shared/widgets/content/series_card_widget.dart';
 
 class ExplorePage extends StatefulWidget {
   final User user;
@@ -215,15 +216,15 @@ class _ExplorePageState extends State<ExplorePage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: NetworkImage(series.thumbnailUrl),
-                      fit: BoxFit.cover,
-                    ),
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                child: SeriesCard(
+                  title: series.title,
+                  thumbnailURL: series.thumbnailUrl,
+                  onTap: () => context.push(
+                    '/series_details_page',
+                    extra: {
+                      'series': series,
+                      'user': widget.user,
+                    },
                   ),
                 ),
               ),

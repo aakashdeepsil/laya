@@ -84,7 +84,7 @@ List<RouteBase> routes = [
     },
   ),
   GoRoute(
-    path: 'library',
+    path: 'favorites',
     builder: (BuildContext context, GoRouterState state) {
       final user = state.extra as User;
       return LibraryPage(user: user);

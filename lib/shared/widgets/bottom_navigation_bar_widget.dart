@@ -50,8 +50,8 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     ),
     _NavItem(
       icon: LucideIcons.library,
-      label: 'Library',
-      route: '/library',
+      label: 'Favorites',
+      route: '/favorites',
     ),
     _NavItem(
       icon: LucideIcons.userCircle,
