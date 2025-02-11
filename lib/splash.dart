@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/supabase_config.dart';
-import 'package:laya/config/schema/user.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:laya/config/schema/user/user.dart';
 import 'package:laya/features/profile/data/user_repository.dart';
 
-class SplashPage extends StatefulWidget {
+// 1. Create User Repository Provider
+final userRepositoryProvider = Provider<UserRepository>((ref) {
+  return UserRepository();
+});
+
+// 2. Create Auth State Provider
+final authStateProvider = StreamProvider<auth.User?>((ref) {
+  return auth.FirebaseAuth.instance.authStateChanges();
+});
+
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends ConsumerState<SplashPage> {
   double get screenHeight => MediaQuery.of(context).size.height;
   double get screenWidth => MediaQuery.of(context).size.width;
-
-  final UserRepository _userRepository = UserRepository();
 
   @override
   void initState() {
@@ -25,36 +34,38 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _redirectToNextPage() async {
     await Future.delayed(const Duration(seconds: 2));
-
     if (!mounted) return;
 
+    // 3. Get current user from Firebase
+    final firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    
+    if (firebaseUser == null) {
+      _navigateTo('/onboarding');
+      return;
+    }
+
     try {
-      final session = supabase.auth.currentSession;
+      // 4. Access repository through Riverpod
+      final userRepo = ref.read(userRepositoryProvider);
+      final userData = await userRepo.getUser(firebaseUser.uid);
 
-      if (session == null) {
-        _navigateTo('/landing');
-        return;
-      }
-
-      final userResponse = await _userRepository.getUser(session.user.id);
-
-      if (userResponse == null) {
+      if (userData == null) {
         _showError('User profile not found');
-        _navigateTo('/landing');
+        _navigateTo('/onboarding');
         return;
       }
 
-      final user = User.fromJson(userResponse);
+      final currentUser = User.fromJson(userData);
 
-      if (_isUserProfileIncomplete(user)) {
-        _navigateTo('/complete_user_profile_page', extra: user);
+      if (_isUserProfileIncomplete(currentUser)) {
+        _navigateTo('/complete_user_profile_page', extra: currentUser);
         return;
       }
 
-      _navigateTo('/home', extra: user);
+      _navigateTo('/home', extra: currentUser);
     } catch (error) {
       _showError(error.toString());
-      _navigateTo('/landing');
+      _navigateTo('/onboarding');
     }
   }
 
@@ -69,10 +80,7 @@ class _SplashPageState extends State<SplashPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Theme.of(context).colorScheme.error,
-        content: Text(
-          'Something went wrong. Please try again later.',
-          style: TextStyle(fontSize: screenHeight * 0.02),
-        ),
+        content: const Text('Something went wrong. Please try again later.'),
       ),
     );
   }
