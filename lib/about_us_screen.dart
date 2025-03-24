@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class AboutUs extends StatefulWidget {
-  const AboutUs({super.key});
+class AboutUsScreen extends StatefulWidget {
+  const AboutUsScreen({super.key});
 
   @override
-  State<AboutUs> createState() => _AboutUsState();
+  State<AboutUsScreen> createState() => _AboutUsScreenState();
 }
 
-class _AboutUsState extends State<AboutUs> {
+class _AboutUsScreenState extends State<AboutUsScreen> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
