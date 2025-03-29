@@ -1,8 +1,10 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/onboarding.dart';
-import 'package:laya/shared/widgets/onboarding_item_widget.dart';
+import 'package:laya/models/onboarding_model.dart';
+import 'package:laya/shared/widgets/onboarding_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // State provider for current page index
@@ -47,7 +49,7 @@ class OnboardingScreen extends ConsumerWidget {
       // Update provider state
       ref.read(hasCompletedOnboardingProvider.notifier).state = true;
     } catch (e) {
-      debugPrint('Error saving onboarding status: $e');
+      developer.log('Error saving onboarding status: $e');
       // Continue anyway to not block the user
     }
   }
