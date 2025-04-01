@@ -1,484 +1,720 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
-// Theme constants and ReaderTheme class remain the same...
-class ReaderTheme {
-  final Color background;
-  final Color text;
-  final Color accent;
-
-  const ReaderTheme({
-    required this.background,
-    required this.text,
-    required this.accent,
-  });
-}
-
-class ReaderThemes {
-  static const dark = ReaderTheme(
-    background: Color(0xFF09090B),
-    text: Colors.white,
-    accent: Color(0xFF818CF8),
-  );
-
-  static const light = ReaderTheme(
-    background: Colors.white,
-    text: Color(0xFF09090B),
-    accent: Color(0xFF818CF8),
-  );
-
-  static const sepia = ReaderTheme(
-    background: Color(0xFFF8F4E9),
-    text: Color(0xFF5C4B37),
-    accent: Color(0xFF8B7355),
-  );
-
-  static const nightBlue = ReaderTheme(
-    background: Color(0xFF0F172A),
-    text: Color(0xFFE2E8F0),
-    accent: Color(0xFF60A5FA),
-  );
-}
-
-// Reader state class remains the same...
-class ReaderState extends ChangeNotifier {
-  String _readerMode = 'book';
-  bool _showControls = true;
-  double _fontSize = 18;
-  double _lineHeight = 1.6;
-  double _brightness = 0.8;
-  int _currentPage = 1;
-  int _totalPages = 324;
-  String _selectedFont = 'System';
-  ReaderTheme _currentTheme = ReaderThemes.dark;
-  String _readingDirection = 'ltr';
-  List<Bookmark> _bookmarks = [];
-  double _marginSize = 20;
-
-  // Sample book text
-  final String sampleBookText = '''
-Chapter 1: The Beginning
-
-The ancient manuscript lay before her, its pages yellowed with age, corners frayed from countless hands that had turned them over the centuries. Sarah's fingers trembled as she traced the intricate symbols etched into the parchment. The library's dim lights cast dancing shadows across the text, making the strange characters seem almost alive.
-
-In all her years of studying ancient languages, she had never encountered anything quite like this. The symbols appeared to be a hybrid of early Sumerian and something else—something older, perhaps. Much older.
-''';
-
-  // Getters
-  String get readerMode => _readerMode;
-  bool get showControls => _showControls;
-  double get fontSize => _fontSize;
-  double get lineHeight => _lineHeight;
-  double get brightness => _brightness;
-  int get currentPage => _currentPage;
-  int get totalPages => _totalPages;
-  String get selectedFont => _selectedFont;
-  ReaderTheme get currentTheme => _currentTheme;
-  String get readingDirection => _readingDirection;
-  List<Bookmark> get bookmarks => _bookmarks;
-  double get marginSize => _marginSize;
-
-  // Setters remain the same...
-  void setReaderMode(String mode) {
-    _readerMode = mode;
-    notifyListeners();
-  }
-
-  void toggleControls() {
-    _showControls = !_showControls;
-    notifyListeners();
-  }
-
-  void setFontSize(double size) {
-    _fontSize = size;
-    notifyListeners();
-  }
-
-  void setTheme(ReaderTheme theme) {
-    _currentTheme = theme;
-    notifyListeners();
-  }
-
-  void addBookmark() {
-    _bookmarks.add(Bookmark(
-      page: _currentPage,
-      timestamp: DateTime.now(),
-      note: '',
-    ));
-    notifyListeners();
-  }
-
-  void setCurrentPage(int page) {
-    _currentPage = page;
-    notifyListeners();
-  }
-}
-
-class Bookmark {
-  final int page;
-  final DateTime timestamp;
-  String note;
-
-  Bookmark({
-    required this.page,
-    required this.timestamp,
-    required this.note,
-  });
-}
-
-class ReaderScreen extends StatelessWidget {
-  const ReaderScreen({Key? key}) : super(key: key);
+class ReadingPreferencesScreen extends StatefulWidget {
+  const ReadingPreferencesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ReaderState(),
-      child: const ReaderContent(),
-    );
-  }
+  State<ReadingPreferencesScreen> createState() =>
+      _ReadingPreferencesScreenState();
 }
 
-class ReaderContent extends StatelessWidget {
-  const ReaderContent({Key? key}) : super(key: key);
+class _ReadingPreferencesScreenState extends State<ReadingPreferencesScreen>
+    with SingleTickerProviderStateMixin {
+  final List<int> _selectedGenres = [];
+  String _readingStyle = 'both';
+  String _primaryLanguage = 'en';
+  final List<String> _secondaryLanguages = [];
+  int _step = 1;
+  late AnimationController _progressController;
+  late Animation<double> _progressAnimation;
+
+  final List<Map<String, dynamic>> _genres = [
+    {
+      'id': 1,
+      'name': 'Fantasy',
+      'icon': '🐉',
+      'image':
+          'https://api.a0.dev/assets/image?text=magical%20fantasy%20world%20with%20dragons&aspect=1:1'
+    },
+    {
+      'id': 2,
+      'name': 'Sci-Fi',
+      'icon': '🚀',
+      'image':
+          'https://api.a0.dev/assets/image?text=futuristic%20sci-fi%20space%20scene&aspect=1:1'
+    },
+    {
+      'id': 3,
+      'name': 'Romance',
+      'icon': '💕',
+      'image':
+          'https://api.a0.dev/assets/image?text=romantic%20sunset%20scene&aspect=1:1'
+    },
+    {
+      'id': 4,
+      'name': 'Mystery',
+      'icon': '🔍',
+      'image':
+          'https://api.a0.dev/assets/image?text=mysterious%20noir%20detective%20scene&aspect=1:1'
+    },
+    {
+      'id': 5,
+      'name': 'Horror',
+      'icon': '👻',
+      'image':
+          'https://api.a0.dev/assets/image?text=dark%20spooky%20haunted%20house&aspect=1:1'
+    },
+    {
+      'id': 6,
+      'name': 'Action',
+      'icon': '💥',
+      'image':
+          'https://api.a0.dev/assets/image?text=epic%20action%20scene%20with%20explosions&aspect=1:1'
+    },
+  ];
+
+  final List<Map<String, dynamic>> _readingStyles = [
+    {'id': 'books', 'name': 'Books', 'icon': Icons.menu_book_outlined},
+    {'id': 'manga', 'name': 'Manga', 'icon': Icons.book_outlined},
+    {'id': 'both', 'name': 'Both', 'icon': Icons.library_books_outlined},
+  ];
+
+  final List<Map<String, dynamic>> _languages = [
+    {'id': 'en', 'name': 'English'},
+    {'id': 'es', 'name': 'Spanish'},
+    {'id': 'fr', 'name': 'French'},
+    {'id': 'de', 'name': 'German'},
+    {'id': 'ja', 'name': 'Japanese'},
+    {'id': 'ko', 'name': 'Korean'},
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
+  void initState() {
+    super.initState();
 
-    return Scaffold(
-      backgroundColor: readerState.currentTheme.background,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: () => readerState.toggleControls(),
-            child: _buildContent(context),
-          ),
-          if (readerState.showControls) _buildControls(context),
-        ],
+    // Set up the status bar to be transparent
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
       ),
     );
-  }
 
-  Widget _buildContent(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return readerState.readerMode == 'book'
-        ? _buildBookContent(context)
-        : _buildMangaContent(context);
-  }
-
-  Widget _buildBookContent(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(readerState.marginSize),
-      child: Text(
-        readerState.sampleBookText,
-        style: TextStyle(
-          fontSize: readerState.fontSize,
-          height: readerState.lineHeight,
-          fontFamily: readerState.selectedFont,
-          color: readerState.currentTheme.text,
-        ),
-      ),
+    // Initialize animation controller
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+      value: 0.25,
     );
-  }
 
-  Widget _buildMangaContent(BuildContext context) {
-    return Container(); // Placeholder for manga content
+    _progressAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_progressController);
   }
-
-  Widget _buildControls(BuildContext context) {
-    return const _ReaderControls();
-  }
-}
-
-class _ReaderControls extends StatelessWidget {
-  const _ReaderControls({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildTopBar(context),
-        const Spacer(),
-        _buildBottomBar(context),
-      ],
-    );
+  void dispose() {
+    _progressController.dispose();
+    super.dispose();
   }
 
-  Widget _buildTopBar(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return Container(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.black.withOpacity(0.8),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              color: readerState.currentTheme.text,
-              onPressed: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'The Ancient Manuscript',
-                    style: TextStyle(
-                      color: readerState.currentTheme.text,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Chapter 1: The Beginning',
-                    style: TextStyle(
-                      color: readerState.currentTheme.text.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.bookmark_border),
-              color: readerState.currentTheme.text,
-              onPressed: () => readerState.addBookmark(),
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              color: readerState.currentTheme.text,
-              onPressed: () => _showSettings(context),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _animateProgress(int newStep) {
+    _progressController.animateTo(newStep * 0.25);
   }
 
-  Widget _buildBottomBar(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Colors.black.withOpacity(0.8),
-          ],
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Text(
-              '${readerState.currentPage}',
-              style: TextStyle(color: readerState.currentTheme.text),
-            ),
-            Expanded(
-              child: Slider(
-                value: readerState.currentPage.toDouble(),
-                min: 1,
-                max: readerState.totalPages.toDouble(),
-                activeColor: readerState.currentTheme.accent,
-                inactiveColor: Colors.grey,
-                onChanged: (value) => readerState.setCurrentPage(value.round()),
-              ),
-            ),
-            Text(
-              '${readerState.totalPages}',
-              style: TextStyle(color: readerState.currentTheme.text),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _handleGenreSelect(int genreId) {
+    setState(() {
+      if (_selectedGenres.contains(genreId)) {
+        _selectedGenres.remove(genreId);
+      } else {
+        _selectedGenres.add(genreId);
+      }
+    });
   }
 
-  void _showSettings(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => const _SettingsPanel(),
-      backgroundColor: Colors.transparent,
-    );
-  }
-}
+  void _handleLanguageSelect(String langId) {
+    if (langId == _primaryLanguage) return;
 
-class _SettingsPanel extends StatelessWidget {
-  const _SettingsPanel({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: readerState.currentTheme.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSettingSection(
-              context,
-              'Display',
-              [
-                _buildFontSizeControl(context),
-                _buildThemeControl(context),
-              ],
-            ),
-            _buildSettingSection(
-              context,
-              'Reading Mode',
-              [
-                _buildModeControl(context),
-                if (readerState.readerMode == 'manga')
-                  _buildDirectionControl(context),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      if (_secondaryLanguages.contains(langId)) {
+        _secondaryLanguages.remove(langId);
+      } else {
+        _secondaryLanguages.add(langId);
+      }
+    });
   }
 
-  Widget _buildSettingSection(
-      BuildContext context, String title, List<Widget> children) {
-    final readerState = Provider.of<ReaderState>(context);
+  void _handleNext() {
+    if (_step < 4) {
+      setState(() {
+        _step += 1;
+      });
+      _animateProgress(_step);
+    } else {
+      // Handle completion
+      debugPrint('Preferences saved');
+    }
+  }
 
+  void _handleBack() {
+    if (_step > 1) {
+      setState(() {
+        _step -= 1;
+      });
+      _animateProgress(_step);
+    }
+  }
+
+  Widget _renderStep() {
+    switch (_step) {
+      case 1:
+        return _buildGenresStep();
+      case 2:
+        return _buildReadingStyleStep();
+      case 3:
+        return _buildLanguageStep();
+      case 4:
+        return _buildSummaryStep();
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildGenresStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
+        const Text(
+          'Pick your favorite genres',
           style: TextStyle(
-            color: readerState.currentTheme.text,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Select at least 3 genres to help us personalize your experience',
+          style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 32),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: _genres.length,
+          itemBuilder: (context, index) {
+            final genre = _genres[index];
+            final isSelected = _selectedGenres.contains(genre['id']);
+
+            return GestureDetector(
+              onTap: () => _handleGenreSelect(genre['id']),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: isSelected
+                      ? Border.all(color: const Color(0xFF818CF8), width: 2)
+                      : null,
+                  color: const Color(0xFF27272A),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      genre['image'],
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: const Color(0xFF818CF8),
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.8),
+                          ],
+                          stops: const [0.5, 1.0],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      child: Text(
+                        '${genre['icon']} ${genre['name']}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReadingStyleStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'How do you like to read?',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Choose your preferred reading style',
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 32),
+        Row(
+          children: _readingStyles.map((style) {
+            final isSelected = _readingStyle == style['id'];
+
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _readingStyle = style['id'];
+                    });
+                  },
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF27272A),
+                        borderRadius: BorderRadius.circular(16),
+                        border: isSelected
+                            ? Border.all(
+                                color: const Color(0xFF818CF8), width: 2)
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            style['icon'],
+                            size: 32,
+                            color: isSelected
+                                ? const Color(0xFF818CF8)
+                                : const Color(0xFF6B7280),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            style['name'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? const Color(0xFF818CF8)
+                                  : const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLanguageStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Language preferences',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Select your primary reading language and any additional languages',
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 32),
+        const Text(
+          'Primary Language',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 16),
-        ...children,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _languages.map((lang) {
+              final isSelected = _primaryLanguage == lang['id'];
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _primaryLanguage = lang['id'];
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF818CF8)
+                          : const Color(0xFF27272A),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      lang['name'],
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected ? Colors.white : const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
         const SizedBox(height: 24),
-      ],
-    );
-  }
+        const Text(
+          'Additional Languages (Optional)',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _languages
+                .where((lang) => lang['id'] != _primaryLanguage)
+                .map((lang) {
+              final isSelected = _secondaryLanguages.contains(lang['id']);
 
-  Widget _buildFontSizeControl(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return Row(
-      children: [
-        Icon(Icons.format_size, color: readerState.currentTheme.text),
-        Expanded(
-          child: Slider(
-            value: readerState.fontSize,
-            min: 14,
-            max: 24,
-            activeColor: readerState.currentTheme.accent,
-            onChanged: (value) => readerState.setFontSize(value),
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () => _handleLanguageSelect(lang['id']),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF818CF8)
+                          : const Color(0xFF27272A),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      lang['name'],
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected ? Colors.white : const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildThemeControl(BuildContext context) {
-    return Wrap(
-      spacing: 16,
+  Widget _buildSummaryStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildThemeButton(context, ReaderThemes.light, 'Light'),
-        _buildThemeButton(context, ReaderThemes.dark, 'Dark'),
-        _buildThemeButton(context, ReaderThemes.sepia, 'Sepia'),
-        _buildThemeButton(context, ReaderThemes.nightBlue, 'Night Blue'),
-      ],
-    );
-  }
-
-  Widget _buildThemeButton(
-      BuildContext context, ReaderTheme theme, String label) {
-    final readerState = Provider.of<ReaderState>(context);
-    final isSelected = readerState.currentTheme == theme;
-
-    return GestureDetector(
-      onTap: () => readerState.setTheme(theme),
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: theme.background,
-          border: Border.all(
-            color: isSelected ? theme.accent : Colors.transparent,
-            width: 2,
+        const Text(
+          'Almost there!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
-          borderRadius: BorderRadius.circular(20),
         ),
-      ),
+        const SizedBox(height: 8),
+        const Text(
+          'Review your preferences and customize your reading experience',
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 32),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF27272A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Selected Genres',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _selectedGenres.map((id) {
+                  final genre = _genres.firstWhere((g) => g['id'] == id);
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF374151),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      genre['name'],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF27272A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Reading Style',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _readingStyles
+                    .firstWhere((s) => s['id'] == _readingStyle)['name'],
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF27272A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Languages',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Primary: ${_languages.firstWhere((l) => l['id'] == _primaryLanguage)['name']}',
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontSize: 16,
+                ),
+              ),
+              if (_secondaryLanguages.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Additional: ${_secondaryLanguages.map((id) => _languages.firstWhere((l) => l['id'] == id)['name']).join(', ')}',
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildModeControl(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF09090B),
+              Color(0xFF18181B),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header with progress
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                child: Stack(
+                  children: [
+                    // Progress bar
+                    Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF27272A),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: _progressAnimation,
+                      builder: (context, child) {
+                        return FractionallySizedBox(
+                          widthFactor: _progressAnimation.value,
+                          child: Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF818CF8),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    if (_step > 1)
+                      Positioned(
+                        left: 0,
+                        child: IconButton(
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: _handleBack,
+                          padding: EdgeInsets.zero,
+                          iconSize: 24,
+                          splashRadius: 24,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
 
-    return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment(value: 'book', label: Text('Book Mode')),
-        ButtonSegment(value: 'manga', label: Text('Manga Mode')),
-      ],
-      selected: {readerState.readerMode},
-      onSelectionChanged: (Set<String> selection) {
-        readerState.setReaderMode(selection.first);
-      },
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
-              return readerState.currentTheme.accent;
-            }
-            return readerState.currentTheme.background;
-          },
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _renderStep(),
+                ),
+              ),
+
+              // Footer with next button
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: GestureDetector(
+                  onTap: _handleNext,
+                  child: Container(
+                    height: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF818CF8),
+                          Color(0xFF6366F1),
+                        ],
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _step == 4 ? 'Get Started' : 'Next',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDirectionControl(BuildContext context) {
-    final readerState = Provider.of<ReaderState>(context);
-
-    return SegmentedButton<String>(
-      segments: const [
-        ButtonSegment(
-          value: 'ltr',
-          icon: Icon(Icons.format_textdirection_l_to_r),
-        ),
-        ButtonSegment(
-          value: 'rtl',
-          icon: Icon(Icons.format_textdirection_r_to_l),
-        ),
-      ],
-      selected: {readerState.readingDirection},
-      onSelectionChanged: (Set<String> selection) {
-        // Implement direction change
-      },
     );
   }
 }

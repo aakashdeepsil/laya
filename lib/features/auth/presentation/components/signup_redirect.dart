@@ -12,7 +12,8 @@ class SignUpRedirect extends StatelessWidget {
         Text(
           "Don't have an account? ",
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         TextButton(

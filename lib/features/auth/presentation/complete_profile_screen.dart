@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:developer' as developer;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:laya/features/auth/presentation/components/debouncer.dart';
+import 'package:laya/shared/utils/debouncer.dart';
 import 'package:laya/features/auth/presentation/components/image_source_option.dart';
 import 'package:laya/models/user_model.dart';
 import 'package:laya/providers/auth_provider.dart';
@@ -460,7 +461,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                                       )
                                     : _avatarUrl.isNotEmpty
                                         ? DecorationImage(
-                                            image: NetworkImage(_avatarUrl),
+                                            image: CachedNetworkImageProvider(
+                                              _avatarUrl,
+                                            ),
                                             fit: BoxFit.cover,
                                           )
                                         : null,
@@ -659,7 +662,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                                   : _saveProfile,
                               style: ElevatedButton.styleFrom(
                                 disabledForegroundColor:
-                                    Colors.white.withOpacity(0.5),
+                                    Colors.white.withValues(alpha: 0.5),
                                 padding: EdgeInsets.zero,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

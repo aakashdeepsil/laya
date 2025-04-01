@@ -111,7 +111,7 @@ class LoginScreen extends ConsumerWidget {
                 'Sign in to continue reading',
                 style: TextStyle(
                   fontSize: 16,
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 40),
