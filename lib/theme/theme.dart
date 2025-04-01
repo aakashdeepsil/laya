@@ -57,19 +57,19 @@ class AppTheme {
     ),
 
     // Elevated Button Theme
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black,
-        backgroundColor: _primary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 12,
-        ),
-      ),
-    ),
+    // elevatedButtonTheme: ElevatedButtonThemeData(
+    //   style: ElevatedButton.styleFrom(
+    //     foregroundColor: Colors.black,
+    //     backgroundColor: _primary,
+    //     shape: RoundedRectangleBorder(
+    //       borderRadius: BorderRadius.circular(12),
+    //     ),
+    //     padding: const EdgeInsets.symmetric(
+    //       horizontal: 24,
+    //       vertical: 12,
+    //     ),
+    //   ),
+    // ),
 
     // Text Button Theme
     textButtonTheme: TextButtonThemeData(
@@ -84,16 +84,16 @@ class AppTheme {
     ),
 
     // AppBar Theme
-    appBarTheme: AppBarTheme(
-      backgroundColor: _primary,
-      elevation: 0,
-      titleTextStyle: GoogleFonts.inter(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: _secondary,
-      ),
-      iconTheme: const IconThemeData(color: Colors.white),
-    ),
+    // appBarTheme: AppBarTheme(
+    //   backgroundColor: _primary,
+    //   elevation: 0,
+    //   titleTextStyle: GoogleFonts.inter(
+    //     fontSize: 20,
+    //     fontWeight: FontWeight.w600,
+    //     color: _secondary,
+    //   ),
+    //   iconTheme: const IconThemeData(color: Colors.white),
+    // ),
 
     // Scaffold Background Color
     scaffoldBackgroundColor: _surface,
@@ -113,7 +113,7 @@ class AppTheme {
       contentTextStyle: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
       ),
     ),
 
@@ -183,7 +183,6 @@ class AppTheme {
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
         backgroundColor: _primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -214,9 +213,7 @@ class AppTheme {
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: _secondary,
       ),
-      iconTheme: const IconThemeData(color: Color(0xFF121212)),
     ),
 
     // Scaffold Background Color
@@ -237,7 +234,7 @@ class AppTheme {
       contentTextStyle: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: const Color(0xFF121212).withOpacity(0.8),
+        color: const Color(0xFF121212).withValues(alpha: 0.8),
       ),
     ),
 
