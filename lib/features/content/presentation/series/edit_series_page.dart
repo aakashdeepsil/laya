@@ -1,53 +1,46 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/category.dart';
-import 'package:laya/config/schema/series.dart';
-import 'package:laya/config/schema/user.dart';
-import 'package:laya/features/content/data/category_repository.dart';
-import 'package:laya/features/content/data/series_repository.dart';
+import 'package:laya/models/category_model.dart';
+import 'package:laya/models/series_model.dart';
+import 'package:laya/services/category_service.dart';
+import 'package:laya/services/series_service.dart';
 import 'package:laya/shared/widgets/content/input_field_widget.dart';
 import 'package:laya/shared/widgets/content/media_button_widget.dart';
-import 'package:laya/shared/widgets/editable_dropdown_widget.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class EditSeriesPage extends StatefulWidget {
+class EditSeriesScreen extends StatefulWidget {
   final Series series;
-  final User user;
 
-  const EditSeriesPage({
-    super.key,
-    required this.series,
-    required this.user,
-  });
+  const EditSeriesScreen({super.key, required this.series});
 
   @override
-  State<EditSeriesPage> createState() => _EditSeriesPageState();
+  State<EditSeriesScreen> createState() => _EditSeriesScreenState();
 }
 
-class _EditSeriesPageState extends State<EditSeriesPage> {
+class _EditSeriesScreenState extends State<EditSeriesScreen> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
   final _formKey = GlobalKey<FormState>();
 
-  final _categoryController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _titleController = TextEditingController();
 
-  final CategoryRepository _categoryRepository = CategoryRepository();
-  final SeriesRepository _seriesRepository = SeriesRepository();
+  final CategoryService _categoryService = CategoryService();
+  final SeriesService _seriesService = SeriesService();
 
   List<Category> categoryOptions = [];
+  Set<String> _selectedCategoryIds = {};
 
   File? _newCoverImage;
   File? _newThumbnail;
   bool _isLoading = false;
   bool _hasChanges = false;
   bool loadingCategories = false;
-  String selectedCategoryId = '';
 
   @override
   void initState() {
@@ -64,21 +57,10 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
         _isLoading = true;
       });
 
-      final categories = await _categoryRepository.getCategories();
-      setState(() => categoryOptions = categories);
-
-      final selectedCategory = categoryOptions.firstWhere(
-        (category) => category.id == widget.series.categoryId,
-        orElse: () => Category(
-          id: '',
-          name: 'name',
-          createdAt: DateTime.now(),
-        ),
-      );
-
+      final categories = await _categoryService.getAllCategories();
       setState(() {
-        selectedCategoryId = selectedCategory.id;
-        _categoryController.text = selectedCategory.name;
+        categoryOptions = categories;
+        _selectedCategoryIds = widget.series.categoryIds.toSet();
       });
 
       _titleController.text = widget.series.title;
@@ -95,14 +77,30 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
 
   void _checkForChanges() {
     final hasTextChanges = _titleController.text != widget.series.title ||
-        _descriptionController.text != (widget.series.description) ||
-        selectedCategoryId != widget.series.categoryId;
+        _descriptionController.text != widget.series.description ||
+        !_areCategoryIdsEqual(_selectedCategoryIds, widget.series.categoryIds);
 
     final hasNewCoverImage = _newCoverImage != null;
     final hasNewThumbnail = _newThumbnail != null;
 
     setState(() {
       _hasChanges = hasTextChanges || hasNewThumbnail || hasNewCoverImage;
+    });
+  }
+
+  bool _areCategoryIdsEqual(Set<String> set1, List<String> list2) {
+    if (set1.length != list2.length) return false;
+    return set1.containsAll(list2) && list2.every((id) => set1.contains(id));
+  }
+
+  void _toggleCategory(String categoryId) {
+    setState(() {
+      if (_selectedCategoryIds.contains(categoryId)) {
+        _selectedCategoryIds.remove(categoryId);
+      } else {
+        _selectedCategoryIds.add(categoryId);
+      }
+      _checkForChanges();
     });
   }
 
@@ -148,12 +146,17 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
     try {
       setState(() => _isLoading = true);
 
-      final updatedSeries = await _seriesRepository.updateSeries(
-        seriesId: widget.series.id,
-        categoryId: selectedCategoryId,
-        creatorId: widget.user.id,
-        description: _descriptionController.text,
-        title: _titleController.text,
+      // First create an updated Series object using copyWith
+      final updatedSeriesData = widget.series.copyWith(
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        categoryIds: _selectedCategoryIds.toList(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Handle file uploads and get the updated series
+      final updatedSeries = await _seriesService.updateSeries(
+        series: updatedSeriesData,
         newCoverImage: _newCoverImage,
         newThumbnail: _newThumbnail,
       );
@@ -168,10 +171,7 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
             ),
           ),
         );
-        context.go('/series_details_page', extra: {
-          'series': updatedSeries,
-          'user': widget.user,
-        });
+        context.go('/series_details', extra: {'series': updatedSeries});
       }
     } catch (e) {
       _showError(e.toString());
@@ -260,51 +260,6 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.series.thumbnailUrl.isNotEmpty ||
-                      _newThumbnail != null)
-                    Container(
-                      height: screenHeight * 0.25,
-                      width: double.infinity,
-                      margin: EdgeInsets.only(bottom: screenHeight * 0.02),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: _newThumbnail != null
-                              ? FileImage(_newThumbnail!) as ImageProvider
-                              : NetworkImage(widget.series.thumbnailUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  MediaButton(
-                    label: 'Change Thumbnail',
-                    icon: LucideIcons.image,
-                    onTap: _pickThumbnail,
-                    selectedFileName: _newThumbnail?.path.split('/').last,
-                  ),
-                  if (widget.series.coverImageUrl.isNotEmpty ||
-                      _newCoverImage != null)
-                    Container(
-                      height: screenHeight * 0.25,
-                      width: double.infinity,
-                      margin: EdgeInsets.only(bottom: screenHeight * 0.02),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: _newCoverImage != null
-                              ? FileImage(_newCoverImage!) as ImageProvider
-                              : NetworkImage(widget.series.coverImageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  MediaButton(
-                    label: 'Change Cover Image',
-                    icon: LucideIcons.image,
-                    onTap: _pickCoverImage,
-                    selectedFileName: _newCoverImage?.path.split('/').last,
-                  ),
-                  SizedBox(height: screenHeight * 0.01),
                   InputField(
                     controller: _titleController,
                     label: 'Title',
@@ -329,36 +284,97 @@ class _EditSeriesPageState extends State<EditSeriesPage> {
                       return null;
                     },
                   ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   SizedBox(height: screenHeight * 0.01),
-                  EditableDropdown(
-                    label: 'Category',
-                    hint: 'Select series category',
-                    controller: _categoryController,
-                    isLoading: loadingCategories,
-                    items: categoryOptions
-                        .map(
-                          (category) => category.name,
-                        )
-                        .toList(),
-                    onChanged: (selectedCategory) {
-                      final category = categoryOptions.firstWhere(
-                        (category) => category.name == selectedCategory,
-                        orElse: () => Category(
-                          id: '',
-                          name: '',
-                          description: '',
-                          createdAt: DateTime.now(),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: categoryOptions.map((category) {
+                      final isSelected = _selectedCategoryIds.contains(
+                        category.id,
+                      );
+                      return FilterChip(
+                        label: Text(category.name),
+                        selected: isSelected,
+                        onSelected: (_) => _toggleCategory(category.id),
+                        showCheckmark: true,
+                        selectedColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        checkmarkColor:
+                            Theme.of(context).colorScheme.onPrimaryContainer,
+                        labelStyle: TextStyle(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        side: BorderSide(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
                         ),
                       );
-
-                      if (category.id.isNotEmpty) {
-                        setState(() {
-                          selectedCategoryId = category.id;
-                          _categoryController.text = category.name;
-                        });
-                        _checkForChanges();
-                      }
-                    },
+                    }).toList(),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  if (widget.series.thumbnailUrl!.isNotEmpty ||
+                      _newThumbnail != null)
+                    Container(
+                      height: screenHeight * 0.25,
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: screenHeight * 0.02),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: _newThumbnail != null
+                              ? FileImage(_newThumbnail!) as ImageProvider
+                              : CachedNetworkImageProvider(
+                                  widget.series.thumbnailUrl!,
+                                ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: screenHeight * 0.02),
+                  MediaButton(
+                    label: 'Change Thumbnail',
+                    icon: LucideIcons.image,
+                    onTap: _pickThumbnail,
+                    selectedFileName: _newThumbnail?.path.split('/').last,
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  if (widget.series.coverImageUrl!.isNotEmpty ||
+                      _newCoverImage != null)
+                    Container(
+                      height: screenHeight * 0.25,
+                      width: double.infinity,
+                      margin: EdgeInsets.only(bottom: screenHeight * 0.02),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: _newCoverImage != null
+                              ? FileImage(_newCoverImage!) as ImageProvider
+                              : CachedNetworkImageProvider(
+                                  widget.series.coverImageUrl!,
+                                ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: screenHeight * 0.02),
+                  MediaButton(
+                    label: 'Change Cover Image',
+                    icon: LucideIcons.image,
+                    onTap: _pickCoverImage,
+                    selectedFileName: _newCoverImage?.path.split('/').last,
                   ),
                 ],
               ),

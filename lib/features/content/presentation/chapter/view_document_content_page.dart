@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/content.dart';
-import 'package:laya/config/schema/user.dart';
+import 'package:laya/models/content_model.dart';
+import 'package:laya/models/user_model.dart';
 import 'package:laya/enums/content_status.dart';
-import 'package:laya/features/content/data/content_repository.dart';
-import 'package:laya/shared/widgets/cached_document_widget.dart';
+import 'package:laya/providers/content_provider.dart';
 import 'package:laya/shared/widgets/content/delete_alert_dialog_widget.dart';
+import 'package:laya/shared/widgets/cached_document_widget.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-class ViewDocumentContentPage extends StatefulWidget {
+class ViewDocumentContentPage extends ConsumerStatefulWidget {
   final Content content;
   final User user;
 
@@ -18,107 +20,57 @@ class ViewDocumentContentPage extends StatefulWidget {
   });
 
   @override
-  State<ViewDocumentContentPage> createState() =>
+  ConsumerState<ViewDocumentContentPage> createState() =>
       _ViewDocumentContentPageState();
 }
 
-class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
+class _ViewDocumentContentPageState
+    extends ConsumerState<ViewDocumentContentPage> {
   double get screenHeight => MediaQuery.of(context).size.height;
   double get screenWidth => MediaQuery.of(context).size.width;
 
-  final ContentRepository _contentRepository = ContentRepository();
-
   int _currentPage = 0;
   int _totalPages = 0;
-
-  double _readingProgress = 0.0;
-
-  bool isDeletingContent = false;
   bool isDocumentLoaded = false;
-  bool loadingReadingProgress = false;
 
   @override
   void initState() {
     super.initState();
-    _loadReadingProgress();
-  }
-
-  // Load the reading progress of the user
-  Future<void> _loadReadingProgress() async {
-    try {
-      setState(() => loadingReadingProgress = true);
-
-      final readingProgressResponse =
-          await _contentRepository.getReadingProgress(
-        contentId: widget.content.id,
-        userId: widget.user.id,
-      );
-
-      if (readingProgressResponse != null) {
-        setState(() {
-          _currentPage = readingProgressResponse.currentPage;
-          _readingProgress = readingProgressResponse.progress;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            content: Text(
-              "Failed to load reading progress.",
-              style: TextStyle(fontSize: screenHeight * 0.02),
-            ),
-          ),
+    // Load reading progress
+    ref
+        .read(readingProgressProvider((
+          contentId: widget.content.id,
+          userId: widget.user.id,
+        )).notifier)
+        .loadReadingProgress(
+          contentId: widget.content.id,
+          userId: widget.user.id,
         );
-      }
-    } finally {
-      setState(() => loadingReadingProgress = false);
-    }
   }
 
-  // Save the reading progress of the user
-  Future<void> _saveReadingProgress() async {
-    try {
-      await _contentRepository.saveReadingProgress(
-        contentId: widget.content.id,
-        userId: widget.user.id,
-        currentPage: _currentPage,
-        progress: _readingProgress,
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            content: Text(
-              "Failed to save reading progress.",
-              style: TextStyle(fontSize: screenHeight * 0.02),
-            ),
-          ),
+  // Update reading progress
+  void _updateReadingProgress(double progress) {
+    ref
+        .read(readingProgressProvider((
+          contentId: widget.content.id,
+          userId: widget.user.id,
+        )).notifier)
+        .updateReadingProgress(
+          contentId: widget.content.id,
+          userId: widget.user.id,
+          progress: progress,
         );
-      }
-    }
   }
 
-  // Show the delete confirmation dialog
-  void _showDeleteConfirmation() {
-    showDialog(
-      context: context,
-      barrierDismissible: !isDeletingContent,
-      builder: (context) => DeleteAlertDialog(
-        isDeleting: isDeletingContent,
-        deleteContent: deleteContent,
-        deleteSeries: null,
-      ),
-    );
-  }
-
-  // Delete the content
+  // Delete content
   Future<void> deleteContent() async {
     try {
-      setState(() => isDeletingContent = true);
-      await _contentRepository.deleteContent(widget.content.id);
+      await ref
+          .read(contentProvider(widget.content.seriesId).notifier)
+          .deleteContent(widget.content.id);
+      if (mounted) {
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -131,18 +83,18 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
           ),
         );
       }
-    } finally {
-      setState(() => isDeletingContent = false);
     }
   }
 
-  // Update the content status
+  // Update content status
   Future<void> updateContentStatus() async {
     try {
-      await _contentRepository.updateContentStatus(
-        contentId: widget.content.id,
-        status: ContentStatus.published,
-      );
+      await ref
+          .read(contentProvider(widget.content.seriesId).notifier)
+          .updateContentStatus(
+            contentId: widget.content.id,
+            status: ContentStatus.published,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,116 +124,80 @@ class _ViewDocumentContentPageState extends State<ViewDocumentContentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final readingProgress = ref.watch(readingProgressProvider((
+      contentId: widget.content.id,
+      userId: widget.user.id,
+    )));
+
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text(
           widget.content.title,
           style: TextStyle(fontSize: screenHeight * 0.02),
         ),
-        actions: widget.content.creatorId == widget.user.id
-            ? [
-                PopupMenuButton<int>(
-                  icon: Icon(Icons.more_vert, size: screenHeight * 0.025),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 1,
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.edit,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        title: Text(
-                          'Edit',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                            fontSize: screenHeight * 0.02,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () {
-                          context.pop(); // Close the popup menu
-                          context.push('/edit_content_page', extra: {
-                            'content': widget.content,
-                            'user': widget.user,
-                          });
-                        },
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 2,
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.delete,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        title: Text(
-                          'Delete',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: screenHeight * 0.02,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () {
-                          context.pop();
-                          _showDeleteConfirmation();
-                        },
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 3,
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.publish,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        title: Text(
-                          'Publish',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontSize: screenHeight * 0.02,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () {
-                          context.pop(); // Close the popup menu
-                          updateContentStatus();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ]
-            : null,
+        actions: [
+          if (widget.content.isEditable)
+            IconButton(
+              icon: Icon(
+                LucideIcons.trash2,
+                size: screenHeight * 0.025,
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => DeleteAlertDialog(
+                    isDeleting: false,
+                    deleteContent: deleteContent,
+                    deleteSeries: null,
+                  ),
+                );
+              },
+            ),
+          if (widget.content.status == ContentStatus.draft)
+            IconButton(
+              icon: Icon(
+                LucideIcons.send,
+                size: screenHeight * 0.025,
+              ),
+              onPressed: updateContentStatus,
+            ),
+        ],
       ),
-      body: SafeArea(
-        child: Stack(
+      body: readingProgress.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text(
+            'Error loading reading progress: $error',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+        data: (progress) => Column(
           children: [
-            CachedPdfViewer(
-              mediaUrl: widget.content.mediaUrl,
-              initialPageNumber: _currentPage,
-              onDocumentLoaded: (details) {
-                setState(() => _totalPages = details.document.pages.count);
-              },
-              onPageChanged: (details) {
-                setState(() {
-                  _currentPage = details.newPageNumber - 1;
-                  _readingProgress = _currentPage / (_totalPages - 1);
-                });
-                _saveReadingProgress();
-              },
-              canShowPaginationDialog: false,
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            Expanded(
+              child: CachedPdfViewer(
+                documentUrl: widget.content.mediaUrl,
+                onDocumentLoaded: (pages) {
+                  setState(() {
+                    _totalPages = pages;
+                    isDocumentLoaded = true;
+                  });
+                },
+                onPageChanged: (page) {
+                  setState(() => _currentPage = page);
+                  _updateReadingProgress(page / _totalPages);
+                },
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _saveReadingProgress();
-    super.dispose();
   }
 }
