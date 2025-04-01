@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "570357596000",
+    "project_id": "laya-bluefyre-entertainment",
+    "storage_bucket": "laya-bluefyre-entertainment.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570357596000:android:704c2778b524f052f3a805",
+        "android_client_info": {
+          "package_name": "com.bluefyreentertainment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "570357596000-rhgdl8n8e29o0k53p2au21eqpt0dmog0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluefyreentertainment",
+            "certificate_hash": "c4382d2932b57ed371fd91a822d92908ca614436"
+          }
+        },
+        {
+          "client_id": "570357596000-p58o434eeglcntmqq0r9s21o9p5o4kb7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1QA2NKKw1QdDBURGsvy6t6OrVQfn5vyY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "570357596000-p58o434eeglcntmqq0r9s21o9p5o4kb7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "570357596000-5laed8kshi512vm0tg52stglg2lmfqek.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.layaUsingCursor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

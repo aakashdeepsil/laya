@@ -52,8 +52,14 @@
 		<string>Editor</string>
 		<key>CFBundleURLSchemes</key>
 		<array>
-			<string>com.example.laya</string>
+			<string>com.bluefyreentertainment.laya</string>
 		</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.570357596000-re1e38b69k5du9kv666qplorec864ech</string>
+			</array>
 		</dict>
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
