@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/config/schema/series.dart';
-import 'package:laya/config/schema/user.dart';
-import 'package:laya/features/content/data/series_repository.dart';
+import 'package:laya/models/series_model.dart';
+import 'package:laya/models/user_model.dart';
+import 'package:laya/services/series_service.dart';
 import 'package:laya/shared/widgets/cached_image_widget.dart';
 
 class ActivityView extends StatefulWidget {
@@ -18,7 +18,7 @@ class _ActivityViewState extends State<ActivityView> {
   double get screenWidth => MediaQuery.of(context).size.width;
   double get screenHeight => MediaQuery.of(context).size.height;
 
-  final SeriesRepository _seriesRepository = SeriesRepository();
+  final SeriesService _seriesService = SeriesService();
 
   List<Series> seriesCreatedByTheUser = [];
 
@@ -27,7 +27,7 @@ class _ActivityViewState extends State<ActivityView> {
   Future<void> _fetchSeriesCreatedByTheUser() async {
     try {
       setState(() => isLoading = true);
-      final series = await _seriesRepository.getUserSeries(widget.user.id);
+      final series = await _seriesService.getUserSeries(widget.user.id);
       setState(() => seriesCreatedByTheUser = series);
     } catch (e) {
       if (mounted) {
@@ -60,14 +60,17 @@ class _ActivityViewState extends State<ActivityView> {
             padding: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
             itemCount: seriesCreatedByTheUser.length,
             separatorBuilder: (context, index) => Divider(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.1),
               thickness: 1,
             ),
             itemBuilder: (context, index) {
               final series = seriesCreatedByTheUser[index];
               return ListTile(
                 leading: CachedImageWidget(
-                  imageUrl: series.thumbnailUrl,
+                  imageUrl: series.thumbnailUrl!,
                   fit: BoxFit.cover,
                   height: screenHeight * 0.2,
                   width: screenWidth * 0.3,
@@ -88,7 +91,7 @@ class _ActivityViewState extends State<ActivityView> {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withOpacity(0.7),
+                        .withValues(alpha: 0.7),
                     fontSize: screenHeight * 0.014,
                   ),
                 ),

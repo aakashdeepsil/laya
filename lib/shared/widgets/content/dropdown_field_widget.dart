@@ -37,7 +37,8 @@ class _DropdownFieldState extends State<DropdownField> {
         SizedBox(height: screenHeight * 0.01),
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(screenHeight * 0.02),
           ),
           child: DropdownButtonFormField<String>(
@@ -57,8 +58,10 @@ class _DropdownFieldState extends State<DropdownField> {
             decoration: InputDecoration(
               hintText: widget.hint,
               hintStyle: TextStyle(
-                color:
-                    Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.38),
                 fontSize: screenHeight * 0.0175,
               ),
               border: OutlineInputBorder(
@@ -74,7 +77,10 @@ class _DropdownFieldState extends State<DropdownField> {
             style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             icon: Icon(
               Icons.keyboard_arrow_down,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.54),
             ),
             isExpanded: true,
             alignment: AlignmentDirectional.centerStart,
