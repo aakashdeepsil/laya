@@ -1,0 +1,41 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "laya-bluefyre-entertainment",
+          "appId": "1:570357596000:android:704c2778b524f052f3a805",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "laya-bluefyre-entertainment",
+          "appId": "1:570357596000:ios:32cdea74ea052f44f3a805",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "laya-bluefyre-entertainment",
+          "appId": "1:570357596000:ios:8c7eaa2a4ba68e41f3a805",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "laya-bluefyre-entertainment",
+          "configurations": {
+            "android": "1:570357596000:android:704c2778b524f052f3a805",
+            "ios": "1:570357596000:ios:32cdea74ea052f44f3a805",
+            "macos": "1:570357596000:ios:8c7eaa2a4ba68e41f3a805",
+            "web": "1:570357596000:web:b1b5d7c5b470451bf3a805",
+            "windows": "1:570357596000:web:7ba26d26abe29828f3a805"
+          }
+        }
+      }
+    }
+  }
+}
