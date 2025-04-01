@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laya/models/user_model.dart';
 import 'dart:developer' as developer;
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service that handles user authentication and profile management
 class AuthService {
@@ -233,6 +235,155 @@ class AuthService {
     } catch (e) {
       developer.log('AuthService: Error checking username: $e');
       return false;
+    }
+  }
+
+  /// Fetches a user profile by their ID
+  /// Returns the User object if found, null otherwise
+  Future<User?> getUserById(String userId) async {
+    developer.log('AuthService: Fetching user profile for ID: $userId');
+
+    try {
+      // Fetch user document from Firestore
+      developer.log('AuthService: Querying Firestore for user document');
+      final docSnapshot = await _userDoc(userId).get();
+
+      if (!docSnapshot.exists) {
+        developer.log('AuthService: No user found with ID: $userId');
+        return null;
+      }
+
+      // Get user data
+      final userData = docSnapshot.data() as Map<String, dynamic>;
+      developer.log('AuthService: User profile retrieved for ID: $userId');
+
+      // Check if this user also exists in Firebase Auth
+      firebase_auth.User? firebaseUser;
+      try {
+        // Try to get the Firebase Auth user list - only available to admin SDK
+        // This is a fallback and might not work in client apps
+        final List<firebase_auth.UserInfo> providerData =
+            _auth.currentUser?.providerData ?? [];
+
+        // Check if we have provider data matching this user ID
+        for (final userInfo in providerData) {
+          if (userInfo.uid == userId) {
+            firebaseUser = _auth.currentUser;
+            break;
+          }
+        }
+      } catch (e) {
+        developer.log('AuthService: Unable to verify Firebase Auth user: $e');
+        // Continue without Firebase Auth data
+      }
+
+      // Return user from Firestore data, with optional Firebase Auth data
+      if (firebaseUser != null) {
+        return User.fromFirebase(firebaseUser, userData: userData);
+      }
+
+      // Create user directly from Firestore data
+      return User.fromFirebase(userData);
+    } catch (e) {
+      developer.log('AuthService: Error fetching user by ID: $e', error: e);
+      return null;
+    }
+  }
+
+  /// Signs in a user with Google
+  Future<User?> signInWithGoogle() async {
+    developer.log('AuthService: Attempting Google sign in');
+    try {
+      // Create a GoogleAuthProvider credential
+      final googleProvider = firebase_auth.GoogleAuthProvider();
+
+      // Get the auth instance
+      final firebase_auth.UserCredential userCredential;
+
+      if (kIsWeb) {
+        // Use popup for web platform
+        userCredential = await _auth.signInWithPopup(googleProvider);
+      } else {
+        // Use Google Sign In plugin for mobile platforms
+        final GoogleSignIn googleSignIn = GoogleSignIn(
+          scopes: [
+            'email',
+            'profile',
+          ],
+        );
+
+        final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+        if (googleUser == null) {
+          developer.log('AuthService: User cancelled Google sign in');
+          return null;
+        }
+
+        // Obtain the auth details from the request
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        // Create a new credential
+        final credential = firebase_auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Sign in to Firebase with the Google credential
+        userCredential = await _auth.signInWithCredential(credential);
+      }
+
+      final firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        developer.log('AuthService: Google sign-in failed - No user returned');
+        return null;
+      }
+
+      developer.log(
+        'AuthService: Google sign-in successful for user ${firebaseUser.uid}',
+      );
+
+      // Check if user exists in Firestore
+      final docSnapshot = await _userDoc(firebaseUser.uid).get();
+
+      if (!docSnapshot.exists) {
+        // Create new user profile
+        developer.log(
+          'AuthService: Creating new user profile for Google user ${firebaseUser.uid}',
+        );
+
+        final now = DateTime.now();
+        final user = User(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          username: firebaseUser.email?.split('@')[0] ??
+              '', // Default username from email
+          firstName: firebaseUser.displayName?.split(' ').first ?? '',
+          lastName: firebaseUser.displayName?.split(' ').last ?? '',
+          avatarUrl: firebaseUser.photoURL ?? '',
+          createdAt: now,
+          updatedAt: now,
+          lastLoginAt: now,
+        );
+
+        // Save to Firestore
+        await _userDoc(firebaseUser.uid).set(user.toJson());
+        developer.log('AuthService: User profile created successfully');
+        return user;
+      } else {
+        // Update last login for existing user
+        await _userDoc(firebaseUser.uid).update({
+          'lastLoginAt': DateTime.now().toIso8601String(),
+        });
+
+        // Return existing user with updated Firebase data
+        final userData = docSnapshot.data() as Map<String, dynamic>;
+        return User.fromFirebase(firebaseUser, userData: userData);
+      }
+    } catch (e) {
+      developer.log('AuthService: Google sign-in error: $e');
+      return null;
     }
   }
 }
