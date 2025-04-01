@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:laya/features/library/components/loading_grid.dart';
 import 'package:laya/features/library/components/series_card.dart';
 import 'package:laya/models/series_model.dart';
@@ -25,7 +26,12 @@ class LibraryScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Library'),
-        backgroundColor: const Color(0xFF0f172a),
+        leading: IconButton(
+          onPressed: () {
+            context.go('/home');
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       body: libraryAsync.when(
         loading: () => const LoadingGrid(),

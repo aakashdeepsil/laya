@@ -18,8 +18,8 @@ class ShimmerLoading extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Shimmer.fromColors(
-      baseColor: colorScheme.surfaceVariant.withOpacity(0.3),
-      highlightColor: colorScheme.surfaceVariant.withOpacity(0.1),
+      baseColor: colorScheme.surfaceVariant.withValues(alpha: 0.3),
+      highlightColor: colorScheme.surfaceVariant.withValues(alpha: 0.1),
       child: child,
     );
   }

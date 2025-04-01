@@ -1,36 +1,36 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laya/features/home/presentation/components/category_section.dart';
 import 'package:laya/features/home/presentation/components/hero_banner.dart';
 import 'package:laya/features/home/presentation/components/navigation_drawer.dart';
-import 'package:laya/features/home/presentation/providers/home_providers.dart';
+import 'package:laya/providers/home_provider.dart';
 import 'package:laya/providers/auth_provider.dart';
-import 'dart:developer' as developer;
 
-class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    developer.log('HomePage initialized', name: 'HomePage');
+    developer.log('HomeScreen initialized', name: 'HomeScreen');
     _scrollController.addListener(_onScroll);
 
     // Simulate loading for demo purposes
-    developer.log('Starting simulated loading delay', name: 'HomePage');
+    developer.log('Starting simulated loading delay', name: 'HomeScreen');
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         developer.log(
           'Simulated loading complete, updating state',
-          name: 'HomePage',
+          name: 'HomeScreen',
         );
         ref.read(loadingProvider.notifier).state = false;
       }
@@ -39,7 +39,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   void dispose() {
-    developer.log('Disposing HomePage', name: 'HomePage');
+    developer.log('Disposing HomeScreen', name: 'HomeScreen');
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -52,14 +52,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (offset % 100 < 1) {
       developer.log(
         'Scrolled to position: ${offset.toStringAsFixed(1)}',
-        name: 'HomePage',
+        name: 'HomeScreen',
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    developer.log('Building HomePage UI', name: 'HomePage');
+    developer.log('Building HomeScreen UI', name: 'HomeScreen');
     final screenSize = MediaQuery.of(context).size;
     final featuredBook = ref.watch(featuredBookProvider);
     final contentCategories = ref.watch(contentCategoriesProvider);
@@ -69,7 +69,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     developer.log(
       'UI build with: scrollOffset=$scrollOffset, isLoading=$isLoading, user=${user?.id ?? "guest"}',
-      name: 'HomePage',
+      name: 'HomeScreen',
     );
 
     return Scaffold(
@@ -83,9 +83,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             physics: const BouncingScrollPhysics(),
             slivers: [
               // Hero banner
-              SliverToBoxAdapter(
-                child: buildHeroBanner(featuredBook, screenSize),
-              ),
+              SliverToBoxAdapter(child: heroBanner(featuredBook, screenSize)),
 
               // Content categories
               SliverList(
@@ -93,7 +91,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   (context, index) {
                     developer.log(
                       'Building category section: ${contentCategories[index].title}',
-                      name: 'HomePage',
+                      name: 'HomeScreen',
                     );
                     final category = contentCategories[index];
                     return buildCategorySection(category, screenSize);
@@ -117,10 +115,10 @@ class _HomePageState extends ConsumerState<HomePage> {
               height: 70 + MediaQuery.of(context).padding.top,
               padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               decoration: BoxDecoration(
-                color: const Color(0xFF0f172a).withOpacity(0.9),
+                color: const Color(0xFF0f172a).withValues(alpha: 0.9),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -133,7 +131,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     onPressed: () {
                       developer.log(
                         'Hamburger menu tapped (header)',
-                        name: 'HomePage',
+                        name: 'HomeScreen',
                       );
                       _scaffoldKey.currentState?.openDrawer();
                     },
@@ -150,7 +148,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   IconButton(
                     icon: const Icon(Icons.search, color: Colors.white),
                     onPressed: () {
-                      developer.log('Search icon tapped', name: 'HomePage');
+                      developer.log('Search icon tapped', name: 'HomeScreen');
                       // Handle search action
                     },
                   ),
@@ -169,7 +167,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 onPressed: () {
                   developer.log(
                     'Hamburger menu tapped (floating)',
-                    name: 'HomePage',
+                    name: 'HomeScreen',
                   );
                   _scaffoldKey.currentState?.openDrawer();
                 },

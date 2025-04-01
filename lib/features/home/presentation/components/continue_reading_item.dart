@@ -43,7 +43,7 @@ Widget buildContinueReadingItem(ContentItem item, Size screenSize) {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: (item.progress ?? 0) / 100,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
                 color: const Color(0xFFe50914),
                 minHeight: 3,
               ),

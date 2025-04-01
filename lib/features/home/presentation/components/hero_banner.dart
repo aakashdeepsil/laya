@@ -1,9 +1,8 @@
-// Build the hero banner with featured content
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:laya/features/home/data/models/content_model.dart';
 
-Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
+Widget heroBanner(FeaturedBook book, Size screenSize) {
   return Stack(
     children: [
       // Banner image
@@ -31,7 +30,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.8),
+              Colors.black.withValues(alpha: 0.8),
             ],
             stops: const [0.3, 1.0],
           ),
@@ -59,7 +58,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
                     Shadow(
                       offset: const Offset(0, 1),
                       blurRadius: 3,
-                      color: Colors.black.withOpacity(0.75),
+                      color: Colors.black.withValues(alpha: 0.75),
                     ),
                   ],
                 ),
@@ -70,7 +69,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
               Text(
                 'by ${book.author}',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 16,
                 ),
               ),
@@ -86,7 +85,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -108,7 +107,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -159,7 +158,7 @@ Widget buildHeroBanner(FeaturedBook book, Size screenSize) {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.1),
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 18,
