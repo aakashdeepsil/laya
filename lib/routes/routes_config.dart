@@ -15,7 +15,7 @@ import 'package:laya/features/library/library_screen.dart';
 import 'package:laya/features/profile/presentation/edit_profile_screen.dart';
 import 'package:laya/features/profile/presentation/profile_settings_screen.dart';
 import 'package:laya/features/profile/presentation/update_password_screen.dart';
-import 'package:laya/features/reader/reader_page.dart';
+import 'package:laya/features/reader/reader_screen.dart';
 import 'package:laya/features/profile/presentation/profile_screen.dart';
 import 'package:laya/models/content_model.dart';
 import 'package:laya/models/series_model.dart';
@@ -96,10 +96,9 @@ List<RouteBase> routes = [
   GoRoute(
     path: 'reader',
     builder: (BuildContext context, GoRouterState state) {
-      return const ReaderScreen(
-        bookId: '',
-        assetPath: 'assets/books/HW3.pdf',
-      );
+      final Map<String, dynamic> extras = state.extra as Map<String, dynamic>;
+      final content = extras['content'] as Content;
+      return ReaderScreen(content: content);
     },
   ),
   GoRoute(
