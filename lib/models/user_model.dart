@@ -5,24 +5,34 @@ enum UserRole { user, creator, admin }
 class User {
   /// Unique identifier for the user
   final String id;
+
   /// User's email address
   final String email;
+
   /// Username for display and identification
   final String username;
+
   /// User's first name
   final String firstName;
+
   /// User's last name
   final String lastName;
+
   /// URL to user's profile picture
   final String avatarUrl;
+
   /// Whether the user's email has been verified
   final bool isVerified;
+
   /// User's permission level in the system
   final UserRole role;
+
   /// When the user account was created
   final DateTime createdAt;
+
   /// When the user account was last updated
   final DateTime updatedAt;
+
   /// When the user last logged in (null if never)
   final DateTime? lastLoginAt;
 
@@ -42,8 +52,10 @@ class User {
   });
 
   /// Creates a User from Firebase authentication data
-  factory User.fromFirebase(dynamic firebaseUser,
-      {Map<String, dynamic>? userData}) {
+  factory User.fromFirebase(
+    dynamic firebaseUser, {
+    Map<String, dynamic>? userData,
+  }) {
     final now = DateTime.now();
 
     // Use provided userData or create default values
@@ -123,12 +135,16 @@ class User {
 extension UserX on User {
   /// User's full name (first + last)
   String get fullName => '$firstName $lastName'.trim();
+
   /// Whether user has a profile picture
   bool get hasAvatar => avatarUrl.isNotEmpty;
+
   /// Whether user has required profile data
   bool get isComplete => username.isNotEmpty && email.isNotEmpty;
+
   /// Whether user has admin privileges
   bool get isAdmin => role == UserRole.admin;
+
   /// Whether user has creator privileges
   bool get isCreator => role == UserRole.creator;
 }
