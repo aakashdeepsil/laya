@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/about_us_screen.dart';
+import 'package:laya/features/ai/screens/ai_dashboard_screen.dart';
 import 'package:laya/features/auth/presentation/complete_profile_screen.dart';
 import 'package:laya/error.dart';
 import 'package:laya/features/auth/presentation/login_screen.dart';
@@ -39,6 +40,12 @@ List<RouteBase> routes = [
     path: 'about_us',
     builder: (BuildContext context, GoRouterState state) {
       return const AboutUsScreen();
+    },
+  ),
+  GoRoute(
+    path: 'ai_dashboard',
+    builder: (BuildContext context, GoRouterState state) {
+      return const AIDashboardScreen();
     },
   ),
   GoRoute(
