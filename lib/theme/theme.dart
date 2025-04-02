@@ -56,49 +56,20 @@ class AppTheme {
       ),
     ),
 
-    // Input Decoration
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white.withOpacity(0.1),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _primary, width: 1),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _error, width: 1),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
-      hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.38),
-      ),
-    ),
-
     // Elevated Button Theme
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black,
-        backgroundColor: _primary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 12,
-        ),
-      ),
-    ),
+    // elevatedButtonTheme: ElevatedButtonThemeData(
+    //   style: ElevatedButton.styleFrom(
+    //     foregroundColor: Colors.black,
+    //     backgroundColor: _primary,
+    //     shape: RoundedRectangleBorder(
+    //       borderRadius: BorderRadius.circular(12),
+    //     ),
+    //     padding: const EdgeInsets.symmetric(
+    //       horizontal: 24,
+    //       vertical: 12,
+    //     ),
+    //   ),
+    // ),
 
     // Text Button Theme
     textButtonTheme: TextButtonThemeData(
@@ -113,16 +84,16 @@ class AppTheme {
     ),
 
     // AppBar Theme
-    appBarTheme: AppBarTheme(
-      backgroundColor: _primary,
-      elevation: 0,
-      titleTextStyle: GoogleFonts.inter(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: _secondary,
-      ),
-      iconTheme: const IconThemeData(color: Colors.white),
-    ),
+    // appBarTheme: AppBarTheme(
+    //   backgroundColor: _primary,
+    //   elevation: 0,
+    //   titleTextStyle: GoogleFonts.inter(
+    //     fontSize: 20,
+    //     fontWeight: FontWeight.w600,
+    //     color: _secondary,
+    //   ),
+    //   iconTheme: const IconThemeData(color: Colors.white),
+    // ),
 
     // Scaffold Background Color
     scaffoldBackgroundColor: _surface,
@@ -142,7 +113,7 @@ class AppTheme {
       contentTextStyle: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
       ),
     ),
 
@@ -209,39 +180,9 @@ class AppTheme {
       ),
     ),
 
-    // Input Decoration
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFF121212).withOpacity(0.05),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _primary, width: 1),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFB00020), width: 1),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
-      hintStyle: TextStyle(
-        color: const Color(0xFF121212).withOpacity(0.38),
-      ),
-    ),
-
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
         backgroundColor: _primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -272,9 +213,7 @@ class AppTheme {
       titleTextStyle: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: _secondary,
       ),
-      iconTheme: const IconThemeData(color: Color(0xFF121212)),
     ),
 
     // Scaffold Background Color
@@ -295,7 +234,7 @@ class AppTheme {
       contentTextStyle: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: const Color(0xFF121212).withOpacity(0.8),
+        color: const Color(0xFF121212).withValues(alpha: 0.8),
       ),
     ),
 

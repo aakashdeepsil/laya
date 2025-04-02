@@ -35,7 +35,7 @@ class _MediaButtonState extends State<MediaButton> {
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border.all(
-              color: colorScheme.primary.withOpacity(0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
               width: 1,
             ),
             borderRadius: BorderRadius.circular(8),
@@ -66,53 +66,38 @@ class _MediaButtonState extends State<MediaButton> {
                           )
                         : Icon(
                             widget.icon,
-                            color: colorScheme.primary.withOpacity(0.8),
+                            color: colorScheme.primary.withValues(alpha: 0.8),
                             size: screenHeight * 0.025,
                           ),
                     SizedBox(width: screenWidth * 0.02),
                     Text(
-                      widget.isLoading ? 'Uploading...' : widget.label,
+                      widget.label,
                       style: TextStyle(
-                        color: colorScheme.primary.withOpacity(0.8),
+                        color: colorScheme.primary.withValues(alpha: 0.8),
                         fontSize: screenHeight * 0.016,
                         fontWeight: FontWeight.w500,
-                        letterSpacing: 0.1,
                       ),
                     ),
+                    if (widget.selectedFileName != null) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          widget.selectedFileName!,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: screenHeight * 0.014,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
           ),
         ),
-        if (widget.selectedFileName != null)
-          Padding(
-            padding: EdgeInsets.only(
-              left: screenHeight * 0.02,
-              top: screenHeight * 0.01,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: colorScheme.primary,
-                  size: screenHeight * 0.02,
-                ),
-                SizedBox(width: screenWidth * 0.02),
-                Expanded(
-                  child: Text(
-                    widget.selectedFileName!,
-                    style: TextStyle(
-                      color: colorScheme.primary.withOpacity(0.8),
-                      fontSize: screenHeight * 0.016,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }

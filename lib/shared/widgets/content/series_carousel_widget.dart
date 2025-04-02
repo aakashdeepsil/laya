@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:laya/config/schema/series.dart';
+import 'package:laya/models/series_model.dart';
 import 'package:laya/shared/widgets/content/series_card_widget.dart';
 
 class SeriesCarousel extends StatefulWidget {

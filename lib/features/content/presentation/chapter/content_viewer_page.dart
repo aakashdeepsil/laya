@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:laya/config/schema/content.dart';
-import 'package:laya/config/schema/user.dart';
+import 'package:laya/models/content_model.dart';
+import 'package:laya/models/user_model.dart';
 import 'package:laya/enums/media_type.dart';
 import 'package:laya/features/content/presentation/chapter/view_document_content_page.dart';
-import 'package:laya/features/content/presentation/chapter/view_video_content_page.dart';
 
 class ContentViewerPage extends StatefulWidget {
   final Content content;
@@ -32,11 +31,6 @@ class _ContentViewerPageState extends State<ContentViewerPage> {
     switch (widget.content.mediaType) {
       case MediaType.document:
         return ViewDocumentContentPage(
-          content: widget.content,
-          user: widget.user,
-        );
-      case MediaType.video:
-        return ViewVideoContentPage(
           content: widget.content,
           user: widget.user,
         );

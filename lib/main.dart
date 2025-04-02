@@ -1,35 +1,69 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
-import 'package:laya/config/supabase_config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:laya/config/firebase.dart';
 import 'package:laya/routes/routes_config.dart';
 import 'package:laya/theme/theme_provider.dart';
-import 'package:provider/provider.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeSupabase();
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: const MyApp(),
-    ),
+
+  developer.log(
+    'Flutter binding initialized',
+    name: 'App:Startup',
   );
+
+  developer.log(
+    'Initializing Firebase...',
+    name: 'App:Startup',
+  );
+
+  await initializeFirebase();
+
+  developer.log(
+    'Firebase initialized successfully',
+    name: 'App:Startup',
+  );
+
+  developer.log(
+    'Starting app with Riverpod',
+    name: 'App:Startup',
+  );
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    developer.log(
+      'Building MyApp with router configuration',
+      name: 'App:Initialize',
+    );
 
-class _MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+
+    developer.log(
+      'Theme loaded: ${theme.isDarkMode ? 'dark' : 'light'} mode',
+      name: 'App:Theme',
+    );
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      theme: Provider.of<ThemeProvider>(context).themeData,
+      theme: theme.theme,
       title: 'LAYA',
+      onGenerateTitle: (context) {
+        developer.log(
+          'App title generated',
+          name: 'App:Initialize',
+        );
+
+        return 'LAYA';
+      },
     );
   }
 }

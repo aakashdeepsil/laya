@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class CachedImageWidget extends StatelessWidget {
   final String imageUrl;
@@ -24,9 +25,11 @@ class CachedImageWidget extends StatelessWidget {
       height: height,
       fit: fit,
       placeholder: (context, url) => const Center(
-        child: CircularProgressIndicator(),
+        child: Icon(LucideIcons.image),
       ),
-      errorWidget: (context, url, error) => const Icon(Icons.error),
+      errorWidget: (context, url, error) => const Center(
+        child: Icon(LucideIcons.alertCircle),
+      ),
       cacheManager: CustomCacheManager.instance,
     );
   }

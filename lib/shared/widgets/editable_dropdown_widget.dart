@@ -43,6 +43,8 @@ class _EditableDropdownState extends State<EditableDropdown> {
   }
 
   void _filterItems() {
+    if (!mounted) return;
+
     final query = widget.controller.text.toLowerCase();
     setState(() {
       _filteredItems = widget.items
@@ -73,8 +75,10 @@ class _EditableDropdownState extends State<EditableDropdown> {
               SizedBox(height: screenHeight * 0.01),
               Container(
                 decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -114,8 +118,9 @@ class _EditableDropdownState extends State<EditableDropdown> {
                     ),
                     if (_isExpanded && _filteredItems.isNotEmpty)
                       Container(
-                        constraints:
-                            BoxConstraints(maxHeight: screenHeight * 0.2),
+                        constraints: BoxConstraints(
+                          maxHeight: screenHeight * 0.2,
+                        ),
                         child: ListView.builder(
                           shrinkWrap: true,
                           padding: EdgeInsets.zero,
