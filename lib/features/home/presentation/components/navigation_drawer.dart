@@ -150,6 +150,19 @@ Widget navigationDrawer(BuildContext context, User? user, WidgetRef ref) {
               ),
               drawerItem(
                 context: context,
+                icon: Icons.smart_toy_rounded,
+                title: 'AI Assistant',
+                onTap: () {
+                  developer.log(
+                    'Drawer: AI Assistant selected, navigating',
+                    name: 'HomePage',
+                  );
+                  Navigator.pop(context);
+                  context.go('/ai_dashboard');
+                },
+              ),
+              drawerItem(
+                context: context,
                 icon: Icons.settings,
                 title: 'Settings',
                 onTap: () {

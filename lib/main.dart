@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:laya/config/firebase.dart';
 import 'package:laya/routes/routes_config.dart';
@@ -11,6 +12,18 @@ void main() async {
 
   developer.log(
     'Flutter binding initialized',
+    name: 'App:Startup',
+  );
+
+  developer.log(
+    'Loading environment variables...',
+    name: 'App:Startup',
+  );
+
+  await dotenv.load();
+
+  developer.log(
+    'Environment variables loaded successfully',
     name: 'App:Startup',
   );
 
