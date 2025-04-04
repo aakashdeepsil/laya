@@ -8,14 +8,21 @@
  */
 
 import * as functions from "firebase-functions/v2";
-import {HfInference} from "@huggingface/inference";
+import { defineString } from "firebase-functions/params";
+import { HfInference } from "@huggingface/inference";
 import * as admin from "firebase-admin";
 
 // Initialize Firebase Admin
 admin.initializeApp();
 
+// Define config parameters
+const huggingfaceApiKey = defineString("huggingface.apikey");
+
 // Configure the Hugging Face Inference client
-const hf = new HfInference(process.env.HUGGINGFACE_API_KEY || "");
+const hf = new HfInference(
+  process.env.HUGGINGFACE_API_KEY ||
+  huggingfaceApiKey.value()
+);
 
 export const generateImage = functions.https.onCall(
   {
@@ -33,7 +40,7 @@ export const generateImage = functions.https.onCall(
     }
 
     try {
-      const {prompt, negativePrompt} = request.data;
+      const { prompt, negativePrompt } = request.data;
 
       // Validate inputs
       if (!prompt) {
@@ -84,10 +91,10 @@ export const generateImageHttp = functions.https.onRequest(
   },
   async (req, res) => {
     try {
-      const {prompt, negativePrompt} = req.body;
+      const { prompt, negativePrompt } = req.body;
 
       if (!prompt) {
-        res.status(400).send({error: "Prompt is required"});
+        res.status(400).send({ error: "Prompt is required" });
         return;
       }
 
