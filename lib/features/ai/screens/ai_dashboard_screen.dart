@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:laya/providers/ai_provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:laya/features/ai/screens/image_generation_screen.dart';
 
 class AIDashboardScreen extends ConsumerStatefulWidget {
   const AIDashboardScreen({super.key});
@@ -154,6 +155,16 @@ class _AIDashboardScreenState extends ConsumerState<AIDashboardScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.image),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ImageGenerationScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(LucideIcons.trash2),
             onPressed: _clearHistory,
