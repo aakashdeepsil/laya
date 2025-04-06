@@ -2,11 +2,14 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:laya/models/series_model.dart';
+import 'package:laya/services/ai_service.dart';
 import 'package:path/path.dart' as path;
 
 class SeriesService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CollectionReference _seriesCollection =
       FirebaseFirestore.instance.collection('series');
+  final AIService _aiService = AIService();
 
   // Get all series for a user
   Future<List<Series>> getUserSeries(String userId) async {
@@ -28,8 +31,17 @@ class SeriesService {
 
   // Create a new series
   Future<String> createSeries(Series series) async {
-    final docRef = await _seriesCollection.add(series.toFirestore());
-    return docRef.id;
+    try {
+      // Create the series first
+      final docRef = await _seriesCollection.add(series.toFirestore());
+
+      // Generate and update the embedding
+      await generateSeriesEmbedding(docRef.id);
+
+      return docRef.id;
+    } catch (e) {
+      throw 'Failed to create series: ${e.toString()}';
+    }
   }
 
   // Update an existing series
@@ -39,6 +51,16 @@ class SeriesService {
     File? newThumbnail,
   }) async {
     try {
+      // Get the existing series
+      final existingSeries = await getSeriesById(series.id);
+      if (existingSeries == null) {
+        throw 'Series not found';
+      }
+
+      // Check if title or description has changed
+      final needsNewEmbedding = series.title != existingSeries.title ||
+          series.description != existingSeries.description;
+
       // Handle file uploads if provided
       String? coverImageUrl;
       String? thumbnailUrl;
@@ -91,6 +113,11 @@ class SeriesService {
       await _seriesCollection
           .doc(series.id)
           .update(updatedSeries.toFirestore());
+
+      // Generate new embedding if needed
+      if (needsNewEmbedding) {
+        await generateSeriesEmbedding(series.id);
+      }
 
       // Return updated series
       return updatedSeries;
@@ -242,6 +269,66 @@ class SeriesService {
       });
     } catch (e) {
       throw Exception('Failed to unpublish series: $e');
+    }
+  }
+
+  // Vector search for series
+  Future<List<Series>> vectorSearchSeries({
+    required String query,
+    String? categoryId,
+    int limit = 20,
+    double distanceThreshold = 0.7,
+  }) async {
+    try {
+      // Generate embedding for the search query
+      final queryEmbedding = await _aiService.generateEmbedding(query);
+
+      // Start with base query
+      Query seriesQuery = _seriesCollection;
+
+      // If category filter is provided, add it to the query
+      if (categoryId != null && categoryId.isNotEmpty) {
+        seriesQuery = seriesQuery.where('category_id', isEqualTo: categoryId);
+      }
+
+      // Perform vector search using native Firestore query
+      final snapshot = await seriesQuery
+          .where('embedding', arrayContains: queryEmbedding)
+          .orderBy('updated_at', descending: true)
+          .limit(limit)
+          .get();
+
+      // Convert to Series objects
+      final results = snapshot.docs
+          .map((doc) => Series.fromFirestore(doc))
+          .where((series) => series.isPublished) // Only return published series
+          .toList();
+
+      return results;
+    } catch (e) {
+      throw 'Failed to perform vector search: ${e.toString()}';
+    }
+  }
+
+  // Generate or update embedding for a series
+  Future<void> generateSeriesEmbedding(String seriesId) async {
+    try {
+      final series = await getSeriesById(seriesId);
+      if (series == null) {
+        throw 'Series not found';
+      }
+
+      // Combine title and description for embedding
+      final text = '${series.title} ${series.description}';
+      final embedding = await _aiService.generateEmbedding(text);
+
+      // Update series with new embedding
+      await _seriesCollection.doc(seriesId).update({
+        'embedding': embedding,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw 'Failed to generate series embedding: ${e.toString()}';
     }
   }
 }

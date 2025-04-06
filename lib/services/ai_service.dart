@@ -5,6 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class AIService {
   static final AIService _instance = AIService._internal();
   static GenerativeModel? _model;
+  static GenerativeModel? _embeddingModel;
   static bool _initialized = false;
   static Future<void>? _initializationFuture;
 
@@ -62,6 +63,11 @@ class AIService {
         ),
       );
 
+      _embeddingModel = GenerativeModel(
+        model: 'embedding-001',
+        apiKey: apiKey,
+      );
+
       // Test the model with a simple prompt to ensure it's properly initialized
       final testResponse = await _model!.generateContent(
         [Content.text('test')],
@@ -74,12 +80,13 @@ class AIService {
       _initializationFuture = null;
 
       developer.log(
-        'AIService successfully initialized with model: gemini-pro',
+        'AIService successfully initialized with models: gemini-pro and embedding-001',
         name: 'AIService',
       );
     } catch (e, stackTrace) {
       _initialized = false;
       _model = null;
+      _embeddingModel = null;
       _initializationFuture = null;
 
       developer.log(
@@ -209,6 +216,48 @@ class AIService {
         level: 1000, // Level.error
       );
       return Stream.value('Error generating response: $e');
+    }
+  }
+
+  Future<List<double>> generateEmbedding(String text) async {
+    try {
+      // Wait for initialization if it's in progress
+      if (_initializationFuture != null) {
+        await _initializationFuture;
+      }
+
+      if (!_initialized || _embeddingModel == null) {
+        throw Exception('AI Service not properly initialized');
+      }
+
+      developer.log(
+        'Generating embedding for text: ${text.length} characters',
+        name: 'AIService',
+      );
+
+      final content = Content.text(text);
+      final embedding = await _embeddingModel!.embedContent(content);
+
+      final values = List<double>.from(embedding.embedding.values);
+      if (values.isEmpty) {
+        throw Exception('Failed to generate embedding');
+      }
+
+      developer.log(
+        'Successfully generated embedding with ${values.length} dimensions',
+        name: 'AIService',
+      );
+
+      return values;
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error generating embedding',
+        name: 'AIService',
+        error: e,
+        stackTrace: stackTrace,
+        level: 1000,
+      );
+      rethrow;
     }
   }
 }

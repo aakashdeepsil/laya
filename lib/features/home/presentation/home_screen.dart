@@ -1,11 +1,14 @@
 import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:laya/features/home/presentation/components/category_section.dart';
 import 'package:laya/features/home/presentation/components/hero_banner.dart';
 import 'package:laya/features/home/presentation/components/navigation_drawer.dart';
 import 'package:laya/providers/home_provider.dart';
 import 'package:laya/providers/auth_provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -149,7 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     icon: const Icon(Icons.search, color: Colors.white),
                     onPressed: () {
                       developer.log('Search icon tapped', name: 'HomeScreen');
-                      // Handle search action
+                      context.push('/search');
                     },
                   ),
                 ],
@@ -178,10 +181,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           if (isLoading)
             Container(
               color: const Color(0xFF0f172a),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFFe50914),
-                ),
+              child: CustomScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                slivers: [
+                  // Shimmer for hero banner
+                  SliverToBoxAdapter(
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey[800]!,
+                      highlightColor: Colors.grey[700]!,
+                      child: Container(
+                        height: screenSize.width * 9 / 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  // Shimmer for categories
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Category title shimmer
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[800]!,
+                                highlightColor: Colors.grey[700]!,
+                                child: Container(
+                                  width: 150,
+                                  height: 24,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // Category items shimmer
+                              SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: 3,
+                                  itemBuilder: (context, itemIndex) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 16),
+                                      child: Shimmer.fromColors(
+                                        baseColor: Colors.grey[800]!,
+                                        highlightColor: Colors.grey[700]!,
+                                        child: Container(
+                                          width: 140,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      childCount: 3,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

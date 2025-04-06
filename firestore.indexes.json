@@ -1,0 +1,32 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "series",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updated_at",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "vectorIndexes": [
+    {
+      "collectionGroup": "series",
+      "dimension": 768,
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "embedding",
+          "dimensions": 768,
+          "distanceMeasureType": "COSINE"
+        }
+      ]
+    }
+  ]
+} 

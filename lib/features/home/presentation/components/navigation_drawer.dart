@@ -132,7 +132,7 @@ Widget navigationDrawer(BuildContext context, User? user, WidgetRef ref) {
                     name: 'HomePage',
                   );
                   Navigator.pop(context);
-                  context.go('/explore');
+                  context.go('/search');
                 },
               ),
               drawerItem(
