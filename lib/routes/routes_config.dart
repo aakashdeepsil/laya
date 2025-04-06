@@ -21,6 +21,7 @@ import 'package:laya/features/profile/presentation/profile_screen.dart';
 import 'package:laya/models/content_model.dart';
 import 'package:laya/models/series_model.dart';
 import 'package:laya/onboarding_screen.dart';
+import 'package:laya/features/search/search_screen.dart';
 import 'package:laya/splash_screen.dart';
 
 final GoRouter router = GoRouter(
@@ -152,6 +153,12 @@ List<RouteBase> routes = [
           state.extra as Map<String, dynamic>? ?? {};
       final content = extras['content'] as Content;
       return EditChapterScreen(content: content);
+    },
+  ),
+  GoRoute(
+    path: 'search',
+    builder: (BuildContext context, GoRouterState state) {
+      return const SearchScreen();
     },
   ),
 ];

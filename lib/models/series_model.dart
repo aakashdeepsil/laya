@@ -12,6 +12,7 @@ class Series {
   final DateTime updatedAt;
   final bool isPublished;
   final int viewCount;
+  final List<double>? embedding;
 
   const Series({
     required this.id,
@@ -25,6 +26,7 @@ class Series {
     required this.updatedAt,
     this.isPublished = false,
     this.viewCount = 0,
+    this.embedding,
   });
 
   // Create from Firestore document
@@ -42,6 +44,9 @@ class Series {
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
       isPublished: data['is_published'] ?? false,
       viewCount: data['view_count'] ?? 0,
+      embedding: data['embedding'] != null
+          ? List<double>.from(data['embedding'])
+          : null,
     );
   }
 
@@ -66,6 +71,9 @@ class Series {
             : DateTime.now(),
         isPublished: json['is_published'] ?? false,
         viewCount: json['view_count'] ?? 0,
+        embedding: json['embedding'] != null
+            ? List<double>.from(json['embedding'])
+            : null,
       );
 
   // Convert to JSON for Firestore
@@ -80,6 +88,7 @@ class Series {
         'updated_at': Timestamp.fromDate(updatedAt),
         'is_published': isPublished,
         'view_count': viewCount,
+        'embedding': embedding,
       };
 
   // Regular JSON conversion (for APIs, localStorage, etc.)
@@ -95,6 +104,7 @@ class Series {
         'updated_at': updatedAt.toIso8601String(),
         'is_published': isPublished,
         'view_count': viewCount,
+        'embedding': embedding,
       };
 
   // Copy with method for immutability
@@ -110,6 +120,7 @@ class Series {
     DateTime? updatedAt,
     bool? isPublished,
     int? viewCount,
+    List<double>? embedding,
   }) {
     return Series(
       id: id ?? this.id,
@@ -123,6 +134,7 @@ class Series {
       updatedAt: updatedAt ?? this.updatedAt,
       isPublished: isPublished ?? this.isPublished,
       viewCount: viewCount ?? this.viewCount,
+      embedding: embedding ?? this.embedding,
     );
   }
 }
