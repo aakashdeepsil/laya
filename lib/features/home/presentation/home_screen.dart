@@ -64,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     developer.log('Building HomeScreen UI', name: 'HomeScreen');
     final screenSize = MediaQuery.of(context).size;
-    final featuredBook = ref.watch(featuredBookProvider);
+    final featuredSeriesAsync = ref.watch(featuredSeriesProvider);
     final contentCategories = ref.watch(contentCategoriesProvider);
     final scrollOffset = ref.watch(scrollOffsetProvider);
     final isLoading = ref.watch(loadingProvider);
@@ -86,7 +86,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             physics: const BouncingScrollPhysics(),
             slivers: [
               // Hero banner
-              SliverToBoxAdapter(child: heroBanner(featuredBook, screenSize)),
+              SliverToBoxAdapter(
+                child: featuredSeriesAsync.when(
+                  data: (series) => heroBanner(series, screenSize, context),
+                  loading: () => Shimmer.fromColors(
+                    baseColor: Colors.grey[800]!,
+                    highlightColor: Colors.grey[700]!,
+                    child: Container(
+                      height: screenSize.height * 0.7,
+                      color: Colors.white,
+                    ),
+                  ),
+                  error: (error, stackTrace) => Container(
+                    height: screenSize.height * 0.7,
+                    color: const Color(0xFF1e293b),
+                    child: Center(
+                      child: Text(
+                        'Error loading featured content: $error',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
               // Content categories
               SliverList(

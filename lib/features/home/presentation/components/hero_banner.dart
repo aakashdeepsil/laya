@@ -1,13 +1,31 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:laya/features/home/data/models/content_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:laya/models/series_model.dart';
+import 'package:laya/providers/auth_provider.dart';
+import 'package:laya/providers/series_provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-Widget heroBanner(FeaturedBook book, Size screenSize) {
+Widget heroBanner(Series? series, Size screenSize, BuildContext context) {
+  if (series == null) {
+    return Container(
+      height: screenSize.height * 0.7,
+      color: const Color(0xFF1e293b),
+      child: const Center(
+        child: Text(
+          'No featured content available',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
   return Stack(
     children: [
       // Banner image
       CachedNetworkImage(
-        imageUrl: book.coverImage,
+        imageUrl: series.coverImageUrl ?? '',
         height: screenSize.height * 0.7,
         width: screenSize.width,
         fit: BoxFit.cover,
@@ -49,7 +67,7 @@ Widget heroBanner(FeaturedBook book, Size screenSize) {
             children: [
               // Title
               Text(
-                book.title,
+                series.title,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: screenSize.width * 0.08,
@@ -64,46 +82,10 @@ Widget heroBanner(FeaturedBook book, Size screenSize) {
                 ),
               ),
 
-              // Author
-              const SizedBox(height: 8),
-              Text(
-                'by ${book.author}',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 16,
-                ),
-              ),
-
-              // Tags
-              const SizedBox(height: 12),
-              Row(
-                children: book.tags
-                    .map((tag) => Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            tag,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ))
-                    .toList(),
-              ),
-
               // Description
               const SizedBox(height: 12),
               Text(
-                book.description,
+                series.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -119,9 +101,10 @@ Widget heroBanner(FeaturedBook book, Size screenSize) {
                 children: [
                   // Read Now button
                   ElevatedButton(
-                    onPressed: () {
-                      // Handle read action
-                    },
+                    onPressed: () => context.push(
+                      '/series_details',
+                      extra: {'series': series},
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFe50914),
                       foregroundColor: Colors.white,
@@ -145,29 +128,84 @@ Widget heroBanner(FeaturedBook book, Size screenSize) {
                   const SizedBox(width: 12),
 
                   // Add to list button
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Handle add to list action
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final user = ref.watch(authStateProvider).valueOrNull;
+                      final libraryStatusAsync = user != null
+                          ? ref.watch(
+                              libraryStatusProvider(
+                                (
+                                  seriesId: series!.id,
+                                  userId: user.id,
+                                ),
+                              ),
+                            )
+                          : const AsyncValue<bool>.data(false);
+
+                      return ElevatedButton.icon(
+                        onPressed: user != null
+                            ? () {
+                                ref
+                                    .read(libraryStatusProvider((
+                                      seriesId: series.id,
+                                      userId: user.id,
+                                    )).notifier)
+                                    .toggleStatus();
+                              }
+                            : null,
+                        icon: libraryStatusAsync.when(
+                          data: (inLibrary) => Icon(
+                            inLibrary ? LucideIcons.check : LucideIcons.plus,
+                            size: 16,
+                          ),
+                          loading: () => const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          error: (_, __) =>
+                              const Icon(LucideIcons.plus, size: 16),
+                        ),
+                        label: libraryStatusAsync.when(
+                          data: (inLibrary) => Text(
+                            user != null
+                                ? (inLibrary ? 'In List' : 'My List')
+                                : 'Sign in to add',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          loading: () => const Text(
+                            'Loading...',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          error: (_, __) => const Text(
+                            'My List',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      );
                     },
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text(
-                      'My List',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
                   ),
                 ],
               ),
