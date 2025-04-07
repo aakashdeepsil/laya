@@ -119,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       name: 'HomeScreen',
                     );
                     final category = contentCategories[index];
-                    return buildCategorySection(category, screenSize);
+                    return buildCategorySection(category, screenSize, context);
                   },
                   childCount: contentCategories.length,
                 ),

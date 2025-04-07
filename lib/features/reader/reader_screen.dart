@@ -12,6 +12,8 @@ import 'package:laya/features/reader/components/reader_bottom_bar.dart';
 import 'package:laya/features/reader/components/reader_settings_panel.dart';
 import 'package:laya/features/reader/data/reader_state.dart';
 import 'package:laya/models/content_model.dart';
+import 'package:laya/providers/auth_provider.dart';
+import 'package:laya/providers/content_provider.dart';
 import 'package:laya/shared/widgets/cached_document_widget.dart';
 import 'package:path/path.dart' as path;
 import 'package:laya/features/reader/providers/reader_provider.dart';
@@ -28,14 +30,58 @@ class ReaderScreen extends ConsumerStatefulWidget {
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool isLoading = true;
   String? error;
+  int? initialPage;
 
   @override
   void initState() {
     super.initState();
     // Schedule initialization after the frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadReadingProgress();
       _initializeBook();
     });
+  }
+
+  Future<void> _loadReadingProgress() async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user != null) {
+      try {
+        final progress =
+            await ref.read(contentServiceProvider).getReadingProgress(
+                  contentId: widget.content.id,
+                  userId: user.id,
+                );
+        if (progress != null) {
+          setState(() {
+            initialPage = progress.currentPage;
+          });
+          // Also update the reader state
+          ref
+              .read(readerProvider(widget.content).notifier)
+              .updateCurrentPage(progress.currentPage);
+        }
+      } catch (e) {
+        developer.log(
+          'Error loading reading progress: $e',
+          name: 'ReaderScreen',
+          error: e,
+        );
+      }
+    }
+  }
+
+  void _updateReadingProgress(int currentPage, int totalPages) {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user != null) {
+      final progress =
+          totalPages > 0 ? currentPage / totalPages.toDouble() : 0.0;
+      ref.read(contentServiceProvider).saveReadingProgress(
+            contentId: widget.content.id,
+            userId: user.id,
+            currentPage: currentPage,
+            progress: progress,
+          );
+    }
   }
 
   @override
@@ -139,6 +185,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   Widget build(BuildContext context) {
     final readerState = ref.watch(readerProvider(widget.content));
+    final user = ref.watch(authStateProvider).valueOrNull;
+    final readingProgress = user != null
+        ? ref.watch(readingProgressProvider((
+            contentId: widget.content.id,
+            userId: user.id,
+          )))
+        : const AsyncValue<double>.data(0.0);
 
     final uri = Uri.parse(widget.content.mediaUrl);
     developer.log(
@@ -206,40 +259,80 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           children: [
             // PDF Viewer
             SafeArea(
-              child: CachedPdfViewer(
-                documentUrl: widget.content.mediaUrl,
-                backgroundColor: readerState.theme.background,
-                loadingColor: readerState.theme.accent,
-                onDocumentLoaded: (pages) {
-                  developer.log(
-                    'PDF document loaded with $pages pages',
-                    name: 'ReaderScreen',
-                  );
-                  ref
-                      .read(readerProvider(widget.content).notifier)
-                      .updateTotalPages(pages);
-                },
-                onPageChanged: (page) {
-                  developer.log(
-                    'PDF page changed to $page',
-                    name: 'ReaderScreen',
-                  );
-                  ref
-                      .read(readerProvider(widget.content).notifier)
-                      .updateCurrentPage(page);
-                },
-                onTextExtracted: (text) {
-                  developer.log(
-                    'PDF text extracted, length: ${text.length}, first 100 chars: ${text.substring(
-                      0,
-                      math.min(100, text.length),
-                    )}',
-                    name: 'ReaderScreen',
-                  );
-                  ref
-                      .read(readerProvider(widget.content).notifier)
-                      .updateContent(text);
-                },
+              child: Column(
+                children: [
+                  // Reading progress indicator
+                  readingProgress.when(
+                    data: (progress) => LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: readerState.theme.background,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        readerState.theme.accent,
+                      ),
+                      minHeight: 2,
+                    ),
+                    loading: () => const SizedBox(height: 2),
+                    error: (_, __) => const SizedBox(height: 2),
+                  ),
+                  Expanded(
+                    child: CachedPdfViewer(
+                      documentUrl: widget.content.mediaUrl,
+                      backgroundColor: readerState.theme.background,
+                      loadingColor: readerState.theme.accent,
+                      initialPage: initialPage,
+                      onDocumentLoaded: (pages) {
+                        developer.log(
+                          'PDF document loaded with $pages pages',
+                          name: 'ReaderScreen',
+                        );
+                        // Update total pages
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          ref
+                              .read(readerProvider(widget.content).notifier)
+                              .updateTotalPages(pages);
+
+                          // If we have an initial page, set it after the frame
+                          if (initialPage != null) {
+                            ref
+                                .read(readerProvider(widget.content).notifier)
+                                .updateCurrentPage(initialPage!);
+                            _updateReadingProgress(initialPage!, pages);
+                          }
+                        });
+                      },
+                      onPageChanged: (page) {
+                        developer.log(
+                          'PDF page changed to $page',
+                          name: 'ReaderScreen',
+                        );
+                        // Update reader state after the frame
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          ref
+                              .read(readerProvider(widget.content).notifier)
+                              .updateCurrentPage(page);
+                          _updateReadingProgress(page, readerState.totalPages);
+                        });
+                      },
+                      onTextExtracted: (text) {
+                        developer.log(
+                          'PDF text extracted, length: ${text.length}, first 100 chars: ${text.substring(
+                            0,
+                            math.min(100, text.length),
+                          )}',
+                          name: 'ReaderScreen',
+                        );
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          ref
+                              .read(readerProvider(widget.content).notifier)
+                              .updateContent(text);
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -324,9 +417,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   totalPages: readerState.totalPages,
                   theme: readerState.theme,
                   onPageChanged: (page) {
-                    ref
-                        .read(readerProvider(widget.content).notifier)
-                        .updateCurrentPage(page);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      // Update reader state
+                      ref
+                          .read(readerProvider(widget.content).notifier)
+                          .updateCurrentPage(page);
+
+                      // Update reading progress
+                      _updateReadingProgress(page, readerState.totalPages);
+                    });
                   },
                 ),
               ],

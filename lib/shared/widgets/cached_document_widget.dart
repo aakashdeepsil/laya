@@ -75,6 +75,7 @@ class CachedPdfViewer extends StatefulWidget {
   final Function(String)? onTextExtracted;
   final Color? backgroundColor;
   final Color? loadingColor;
+  final int? initialPage;
 
   const CachedPdfViewer({
     super.key,
@@ -84,6 +85,7 @@ class CachedPdfViewer extends StatefulWidget {
     this.onTextExtracted,
     this.backgroundColor,
     this.loadingColor,
+    this.initialPage,
   });
 
   @override
@@ -98,6 +100,7 @@ class _CachedPdfViewerState extends State<CachedPdfViewer> {
   bool _isLoading = true;
   int _totalPages = 0;
   Color? _currentBackgroundColor;
+  bool _hasJumpedToInitialPage = false;
 
   @override
   void initState() {
@@ -338,6 +341,12 @@ class _CachedPdfViewerState extends State<CachedPdfViewer> {
                 );
                 _loadDocument(snapshot.data!);
                 widget.onDocumentLoaded(details.document.pages.count);
+
+                // Jump to initial page if specified
+                if (widget.initialPage != null && !_hasJumpedToInitialPage) {
+                  _pdfViewerController?.jumpToPage(widget.initialPage!);
+                  _hasJumpedToInitialPage = true;
+                }
               },
               onDocumentLoadFailed: (details) {
                 developer.log(

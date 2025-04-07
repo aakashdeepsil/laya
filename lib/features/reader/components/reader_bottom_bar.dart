@@ -18,6 +18,10 @@ class ReaderBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    // Ensure current page is within bounds
+    final validCurrentPage = currentPage.clamp(1, totalPages);
+    final progress =
+        totalPages > 0 ? validCurrentPage / totalPages.toDouble() : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -52,7 +56,7 @@ class ReaderBottomBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    currentPage.toString(),
+                    validCurrentPage.toString(),
                     style: TextStyle(
                       color: theme.accent,
                       fontWeight: FontWeight.bold,
@@ -78,7 +82,7 @@ class ReaderBottomBar extends StatelessWidget {
                       ),
                     ),
                     child: Slider(
-                      value: currentPage.toDouble(),
+                      value: validCurrentPage.toDouble(),
                       min: 1,
                       max: totalPages.toDouble(),
                       onChanged: (value) => onPageChanged(value.round()),
@@ -100,7 +104,7 @@ class ReaderBottomBar extends StatelessWidget {
             // Progress percentage
             const SizedBox(height: 8),
             Text(
-              '${((currentPage / totalPages) * 100).round()}% complete',
+              '${(progress * 100).round()}% complete',
               style: TextStyle(
                 color: theme.text.withOpacity(0.6),
                 fontSize: 12,

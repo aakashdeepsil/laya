@@ -1,14 +1,21 @@
 // Build an item for "Continue Reading" category with progress bar
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:laya/features/home/data/models/content_model.dart';
+import 'package:go_router/go_router.dart';
+import 'package:laya/models/content_model.dart';
 
-Widget buildContinueReadingItem(ContentItem item, Size screenSize) {
+Widget buildContinueReadingItem({
+  required Content content,
+  required double progress,
+  required Size screenSize,
+  required BuildContext context,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 8),
     child: GestureDetector(
       onTap: () {
-        // Handle item selection
+        // Navigate to reader screen
+        context.push('/reader', extra: {'content': content});
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -17,7 +24,7 @@ Widget buildContinueReadingItem(ContentItem item, Size screenSize) {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
-              imageUrl: item.coverUrl,
+              imageUrl: content.thumbnailUrl ?? '',
               height: 210,
               width: 140,
               fit: BoxFit.cover,
@@ -42,7 +49,7 @@ Widget buildContinueReadingItem(ContentItem item, Size screenSize) {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
-                value: (item.progress ?? 0) / 100,
+                value: progress,
                 backgroundColor: Colors.white.withValues(alpha: 0.2),
                 color: const Color(0xFFe50914),
                 minHeight: 3,
@@ -55,25 +62,23 @@ Widget buildContinueReadingItem(ContentItem item, Size screenSize) {
           SizedBox(
             width: 140,
             child: Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              content.title,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          // Author
-          const SizedBox(height: 2),
-          SizedBox(
-            width: 140,
-            child: Text(
-              item.author,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
+          // Progress percentage
+          const SizedBox(height: 4),
+          Text(
+            '${(progress * 100).round()}% complete',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
