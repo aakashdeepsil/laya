@@ -11,6 +11,7 @@ class Series {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isPublished;
+  final bool isFeatured;
   final int viewCount;
   final List<double>? embedding;
 
@@ -25,6 +26,7 @@ class Series {
     required this.createdAt,
     required this.updatedAt,
     this.isPublished = false,
+    this.isFeatured = false,
     this.viewCount = 0,
     this.embedding,
   });
@@ -43,6 +45,7 @@ class Series {
       createdAt: (data['created_at'] as Timestamp).toDate(),
       updatedAt: (data['updated_at'] as Timestamp).toDate(),
       isPublished: data['is_published'] ?? false,
+      isFeatured: data['is_featured'] ?? false,
       viewCount: data['view_count'] ?? 0,
       embedding: data['embedding'] != null
           ? List<double>.from(data['embedding'])
@@ -70,6 +73,7 @@ class Series {
                 : DateTime.parse(json['updated_at']))
             : DateTime.now(),
         isPublished: json['is_published'] ?? false,
+        isFeatured: json['is_featured'] ?? false,
         viewCount: json['view_count'] ?? 0,
         embedding: json['embedding'] != null
             ? List<double>.from(json['embedding'])
@@ -87,6 +91,7 @@ class Series {
         'created_at': Timestamp.fromDate(createdAt),
         'updated_at': Timestamp.fromDate(updatedAt),
         'is_published': isPublished,
+        'is_featured': isFeatured,
         'view_count': viewCount,
         'embedding': embedding,
       };
@@ -103,6 +108,7 @@ class Series {
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
         'is_published': isPublished,
+        'is_featured': isFeatured,
         'view_count': viewCount,
         'embedding': embedding,
       };
@@ -119,6 +125,7 @@ class Series {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isPublished,
+    bool? isFeatured,
     int? viewCount,
     List<double>? embedding,
   }) {
@@ -133,6 +140,7 @@ class Series {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isPublished: isPublished ?? this.isPublished,
+      isFeatured: isFeatured ?? this.isFeatured,
       viewCount: viewCount ?? this.viewCount,
       embedding: embedding ?? this.embedding,
     );

@@ -25,19 +25,3 @@ class ContentCategory {
     required this.data,
   });
 }
-
-class FeaturedBook {
-  final String title;
-  final String author;
-  final String description;
-  final String coverImage;
-  final List<String> tags;
-
-  FeaturedBook({
-    required this.title,
-    required this.author,
-    required this.description,
-    required this.coverImage,
-    required this.tags,
-  });
-}

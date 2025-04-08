@@ -4,6 +4,8 @@ import 'package:laya/services/content_service.dart';
 import 'package:laya/enums/content_status.dart';
 import 'package:laya/enums/media_type.dart';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:laya/providers/auth_provider.dart';
 
 // Content service provider
 final contentServiceProvider = Provider<ContentService>((ref) {
@@ -360,4 +362,51 @@ final chapterStateProvider = StateNotifierProvider.family<ChapterStateNotifier,
     AsyncValue<Content?>, String>((ref, contentId) {
   final contentService = ref.watch(contentServiceProvider);
   return ChapterStateNotifier(contentService);
+});
+
+// Recent reading progress provider
+final recentReadingProgressProvider =
+    FutureProvider.autoDispose<List<({Content content, double progress})>>(
+        (ref) async {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return [];
+
+  final contentService = ref.watch(contentServiceProvider);
+  final readingProgressCollection =
+      FirebaseFirestore.instance.collection('reading_progress');
+
+  try {
+    // Get user's reading progress, ordered by last read time
+    final progressSnapshot = await readingProgressCollection
+        .where('user_id', isEqualTo: user.id)
+        .orderBy('last_read', descending: true)
+        .limit(10)
+        .get();
+
+    if (progressSnapshot.docs.isEmpty) return [];
+
+    // Get content details for each progress entry
+    final contentDetails = await Future.wait(
+      progressSnapshot.docs.map((doc) async {
+        final data = doc.data();
+        final contentId = data['content_id'] as String;
+        final progress = (data['progress'] as num).toDouble();
+
+        try {
+          final content = await contentService.getContent(contentId);
+          return (content: content, progress: progress);
+        } catch (e) {
+          // Skip if content no longer exists
+          return null;
+        }
+      }),
+    );
+
+    // Filter out null entries (content that no longer exists)
+    return contentDetails
+        .whereType<({Content content, double progress})>()
+        .toList();
+  } catch (e) {
+    throw 'Failed to load reading progress: $e';
+  }
 });

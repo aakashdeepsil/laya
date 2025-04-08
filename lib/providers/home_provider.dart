@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laya/features/home/data/models/content_model.dart';
+import 'package:laya/models/series_model.dart';
+import 'package:laya/services/series_service.dart';
 
 final activeTabProvider = StateProvider<String>((ref) => "Home");
 
@@ -7,17 +10,18 @@ final scrollOffsetProvider = StateProvider<double>((ref) => 0);
 
 final loadingProvider = StateProvider<bool>((ref) => true);
 
-final featuredBookProvider = Provider<FeaturedBook>((ref) {
-  // This would typically come from a repository
-  return FeaturedBook(
-    title: "The Silent Chronicles",
-    author: "Kei Yamamoto",
-    description:
-        "In a world where silence is currency, one person's whisper could change everything.",
-    coverImage:
-        "https://api.a0.dev/assets/image?text=dark%20fantasy%20book%20cover%20with%20minimal%20design%20and%20a%20small%20figure%20in%20a%20vast%20landscape&aspect=9:16&seed=123",
-    tags: ["Fantasy", "New Release", "Trending"],
-  );
+final featuredSeriesProvider = FutureProvider<Series?>((ref) async {
+  final seriesService = SeriesService();
+  // Get the first featured series that is also published
+  final snapshot = await FirebaseFirestore.instance
+      .collection('series')
+      .where('is_featured', isEqualTo: true)
+      .where('is_published', isEqualTo: true)
+      .limit(1)
+      .get();
+
+  if (snapshot.docs.isEmpty) return null;
+  return Series.fromFirestore(snapshot.docs.first);
 });
 
 final contentCategoriesProvider = Provider<List<ContentCategory>>((ref) {

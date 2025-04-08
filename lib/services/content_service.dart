@@ -199,18 +199,23 @@ class ContentService {
     required double progress,
   }) async {
     try {
-      final docRef = _readingProgressCollection.doc('${userId}_$contentId');
+      final docId = '${userId}_$contentId';
+      final docRef = _readingProgressCollection.doc(docId);
       final doc = await docRef.get();
+      final now = DateTime.now().toIso8601String();
 
       final progressData = {
+        'id': docId,
         'content_id': contentId,
         'user_id': userId,
         'current_page': currentPage,
         'progress': progress,
-        'last_read': DateTime.now().toIso8601String(),
+        'last_read': now,
+        'updated_at': now,
       };
 
       if (!doc.exists) {
+        progressData['created_at'] = now;
         await docRef.set(progressData);
       } else {
         await docRef.update(progressData);
@@ -226,14 +231,33 @@ class ContentService {
     required String userId,
   }) async {
     try {
-      final doc =
-          await _readingProgressCollection.doc('${userId}_$contentId').get();
+      final docId = '${userId}_$contentId';
+      final doc = await _readingProgressCollection.doc(docId).get();
 
       if (!doc.exists) {
         return null;
       }
 
       final data = doc.data() as Map<String, dynamic>;
+      // Ensure all required fields are present
+      data['id'] = docId;
+
+      // Convert timestamps if they're Firestore timestamps
+      final lastRead = data['last_read'];
+      if (lastRead is Timestamp) {
+        data['last_read'] = lastRead.toDate().toIso8601String();
+      }
+
+      final createdAt = data['created_at'];
+      if (createdAt is Timestamp) {
+        data['created_at'] = createdAt.toDate().toIso8601String();
+      }
+
+      final updatedAt = data['updated_at'];
+      if (updatedAt is Timestamp) {
+        data['updated_at'] = updatedAt.toDate().toIso8601String();
+      }
+
       return ReadingProgress.fromJson(data);
     } catch (e) {
       throw 'Failed to load reading progress: ${e.toString()}';
@@ -263,14 +287,36 @@ class ContentService {
     required double progress,
   }) async {
     try {
-      final docRef = _readingProgressCollection.doc('${userId}_$contentId');
+      final docId = '${userId}_$contentId';
+      final docRef = _readingProgressCollection.doc(docId);
+      final doc = await docRef.get();
+      final now = DateTime.now().toIso8601String();
 
-      await docRef.set({
-        'content_id': contentId,
-        'user_id': userId,
-        'progress': progress,
-        'updated_at': DateTime.now().toIso8601String(),
-      }, SetOptions(merge: true));
+      if (!doc.exists) {
+        // First time reading, create a new document
+        await docRef.set({
+          'id': docId,
+          'content_id': contentId,
+          'user_id': userId,
+          'current_page': (progress * 100).round(), // Approximate current page
+          'progress': progress,
+          'last_read': now,
+          'created_at': now,
+          'updated_at': now,
+        });
+      } else {
+        // Update existing document
+        final data = doc.data() as Map<String, dynamic>;
+        await docRef.update({
+          'id': docId,
+          'content_id': contentId,
+          'user_id': userId,
+          'current_page': (progress * 100).round(), // Approximate current page
+          'progress': progress,
+          'last_read': now,
+          'updated_at': now,
+        });
+      }
     } catch (e) {
       throw 'Failed to update reading progress: ${e.toString()}';
     }
